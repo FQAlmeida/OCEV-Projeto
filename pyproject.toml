@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "ocev-projeto"
+version = "0.1.0"
+description = ""
+authors = ["Otávio Almeida <otavioalmeida650@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.26.4"
+
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.12.2"
+pytest = "^8.0.2"
+pytest-cov = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 118
+show-source = true
+include = ["**/*.py", "**/*.pyi", "**/pyproject.toml", "*.ipynb"]
+select = [
+  "E",    # pycodestyle
+  "F",    # pyflakes
+  "UP",   # pyupgrade
+  "N",    # pep8-naming
+  "C90",  # mccabe
+  "I",    # isort
+  "PERF", # perflint
+  "NPY",  # numpy
+  "PL",   # pylint
+  "RUF",  # ruff
+]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "-s --cov=ocev_projeto --cov-report html:tests/htmlcov"
+
+[tool.coverage.report]
+exclude_lines = [
+  "def main",
+  "pragma: no cover",
+  "def __repr__",
+  "def __str__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "if typing.TYPE_CHECKING:"
+]
+
+[tool.taskipy.tasks]
+test = "pytest tests/"
+lint = "ruff . --fix"
