@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from ocev_projeto.population_initialization import Configs, PopType, generate_pop
 
@@ -49,3 +50,22 @@ def test_generate_pop_binary_without_config():
     result = generate_pop(dim, pop_size, PopType.BINARY, None)
     assert isinstance(result, np.ndarray)
     assert np.all(np.logical_or(result == 0, result == 1))
+
+
+def test_generate_pop_raises_exception_without_config_for_some_types():
+    dim = 100
+    pop_size = 150
+    types_that_should_raise_exception = [
+        PopType.INT,
+        PopType.PERMINT,
+        PopType.REAL,
+    ]
+    types_that_should_not_raise_exception = [
+        pop_type for pop_type in PopType if pop_type not in types_that_should_raise_exception
+    ]
+    for pop_type in types_that_should_raise_exception:
+        with pytest.raises(Exception):
+            generate_pop(dim, pop_size, pop_type, None)
+
+    for pop_type in types_that_should_not_raise_exception:
+        generate_pop(dim, pop_size, pop_type, None)
