@@ -4,16 +4,16 @@ import polars as pl
 from matplotlib.axes import Axes
 
 if __name__ == "__main__":
-    df = pl.read_excel("data/EA.xlsx")
+    df_ea = pl.read_excel("data/EA.xlsx")
     ax: Axes
     fig, ax = plt.subplots(figsize=(75, 5), constrained_layout=True)
     _ = ax.set_ylim(-0.5, 5)
-    x_min: float = df["Ano"].to_numpy().astype(np.float32).min()
-    x_max: float = df["Ano"].to_numpy().astype(np.float32).max()
+    x_min: float = df_ea["Ano"].to_numpy().astype(np.float32).min()
+    x_max: float = df_ea["Ano"].to_numpy().astype(np.float32).max()
     _ = ax.set_xlim(left=x_min, right=x_max)
     _ = ax.axhline(0, xmin=0.05, xmax=0.95, c='deeppink', zorder=1)
 
-    df_agged = df.group_by("Ano").agg("Nome")
+    df_agged = df_ea.group_by("Ano").agg("Nome")
     dates = df_agged["Ano"].to_numpy()
     nomes = df_agged["Nome"].to_numpy()
     labels = ["\n".join(n) for n in nomes]
