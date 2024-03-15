@@ -11,15 +11,15 @@ class PopGenerator:
     def generate_pop(self):
         match self.config.pop_type:
             case PopType.INT:
-                return self.generate_int_pop()
+                return self.__generate_int_pop()
             case PopType.PERMINT:
-                return self.generate_permint_pop()
+                return self.__generate_permint_pop()
             case PopType.REAL:
-                return self.generate_real_pop()
+                return self.__generate_real_pop()
             case PopType.BINARY:
-                return self.generate_binary_pop()
+                return self.__generate_binary_pop()
 
-    def generate_int_pop(self):
+    def __generate_int_pop(self):
         if not self.config.bounds:
             raise BoundsError(self.config.pop_type)
         lower = self.config.bounds.lower
@@ -28,7 +28,7 @@ class PopGenerator:
         dim = self.config.dim
         return self.rng.integers(low=int(lower), high=int(upper), size=(pop_size, dim)).astype(np.int32)
 
-    def generate_permint_pop(self):
+    def __generate_permint_pop(self):
         pop_size = self.config.pop_size
         dim = self.config.dim
         space = np.arange(0, dim)
@@ -36,7 +36,7 @@ class PopGenerator:
         x_map, _ = np.meshgrid(space, lines)
         return self.rng.permuted(x_map, axis=1).astype(np.int32)
 
-    def generate_real_pop(self):
+    def __generate_real_pop(self):
         if not self.config.bounds:
             raise BoundsError(self.config.pop_type)
         lower = self.config.bounds.lower
@@ -45,7 +45,7 @@ class PopGenerator:
         dim = self.config.dim
         return self.rng.uniform(low=lower, high=upper, size=(pop_size, dim)).astype(np.float32)
 
-    def generate_binary_pop(self):
+    def __generate_binary_pop(self):
         pop_size = self.config.pop_size
         dim = self.config.dim
         return self.rng.choice(a=(0, 1), size=(pop_size, dim)).astype(np.bool_)
