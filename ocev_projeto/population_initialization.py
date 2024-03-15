@@ -1,63 +1,51 @@
-from dataclasses import dataclass
-from enum import Enum
-
 import numpy as np
 
-
-class PopType(Enum):
-    INT = "int"
-    PERMINT = "permint"
-    REAL = "real"
-    BINARY = "binary"
+from ocev_projeto.models.config import BoundsError, PopConfig, PopType
 
 
-@dataclass
-class Configs:
-    upper: float
-    lower: float
+class PopGenerator:
+    def __init__(self, config: PopConfig, rng: np.random.Generator) -> None:
+        self.config = config
+        self.rng = rng
 
+    def generate_pop(self):
+        match self.config.pop_type:
+            case PopType.INT:
+                return self.generate_int_pop()
+            case PopType.PERMINT:
+                return self.generate_permint_pop()
+            case PopType.REAL:
+                return self.generate_real_pop()
+            case PopType.BINARY:
+                return self.generate_binary_pop()
 
-rng = np.random.default_rng(1337)
+    def generate_int_pop(self):
+        if not self.config.bounds:
+            raise BoundsError(self.config.pop_type)
+        lower = self.config.bounds.lower
+        upper = self.config.bounds.upper
+        pop_size = self.config.pop_size
+        dim = self.config.dim
+        return self.rng.integers(low=int(lower), high=int(upper), size=(pop_size, dim)).astype(np.int32)
 
+    def generate_permint_pop(self):
+        pop_size = self.config.pop_size
+        dim = self.config.dim
+        space = np.arange(0, dim)
+        lines = np.arange(0, pop_size)
+        x_map, _ = np.meshgrid(space, lines)
+        return self.rng.permuted(x_map, axis=1).astype(np.int32)
 
-def generate_pop(dim: int, pop_size: int, type: PopType, config: Configs | None):
-    match type:
-        case PopType.INT:
-            if not config:
-                raise Exception("Config is needed for the PopType")
-            return generate_int_pop(dim, pop_size, config)
-        case PopType.PERMINT:
-            if not config:
-                raise Exception("Config is needed for the PopType")
-            return generate_permint_pop(dim, pop_size, config)
-        case PopType.REAL:
-            if not config:
-                raise Exception("Config is needed for the PopType")
-            return generate_real_pop(dim, pop_size, config)
-        case PopType.BINARY:
-            return generate_binary_pop(dim, pop_size)
+    def generate_real_pop(self):
+        if not self.config.bounds:
+            raise BoundsError(self.config.pop_type)
+        lower = self.config.bounds.lower
+        upper = self.config.bounds.upper
+        pop_size = self.config.pop_size
+        dim = self.config.dim
+        return self.rng.uniform(low=lower, high=upper, size=(pop_size, dim)).astype(np.float32)
 
-
-def generate_int_pop(dim: int, pop_size: int, config: Configs):
-    return rng.integers(low=int(config.lower), high=int(config.upper), size=(pop_size, dim))
-
-
-def generate_permint_pop(dim: int, pop_size: int, config: Configs):
-    return np.array(
-        [
-            rng.choice(
-                a=np.arange(start=int(config.lower), stop=int(config.upper)),
-                size=dim,
-                replace=False,
-            ).astype(np.int32)
-            for _ in range(pop_size)
-        ]
-    )
-
-
-def generate_real_pop(dim: int, pop_size: int, config: Configs):
-    return rng.uniform(low=config.lower, high=config.upper, size=(pop_size, dim))
-
-
-def generate_binary_pop(dim: int, pop_size: int):
-    return rng.choice(a=(0, 1), size=(pop_size, dim)).astype(np.bool_)
+    def generate_binary_pop(self):
+        pop_size = self.config.pop_size
+        dim = self.config.dim
+        return self.rng.choice(a=(0, 1), size=(pop_size, dim)).astype(np.bool_)
