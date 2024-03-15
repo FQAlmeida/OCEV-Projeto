@@ -30,14 +30,14 @@ class GA:
 
     def run(self):
         for _ in range(self.config.qtd_gen):
-            result = self.fitness(self.problem, self.population)
+            result = self.__fitness(self.problem, self.population)
             ranked_results = sorted(enumerate(result), key=lambda x: x[1])
             best_individual_index = ranked_results[0]
             if not self.best_individual_index[1] or best_individual_index[1] > self.best_individual_index[1]:
                 self.best_individual_index = best_individual_index
         return self.best_individual, self.best_individual_value
 
-    def fitness(self, problem: np.ndarray, population: np.ndarray):
+    def __fitness(self, problem: np.ndarray, population: np.ndarray):
         result = self.pool.map(partial(self.objective, problem), population)
         return np.array(result)
 
