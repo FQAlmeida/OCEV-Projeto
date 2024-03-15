@@ -43,6 +43,8 @@ class GA:
 
     @property
     def best_individual(self):
+        if self.best_individual_index == (None, None):
+            return None
         return self.population[self.best_individual_index[0]]
 
     @property
