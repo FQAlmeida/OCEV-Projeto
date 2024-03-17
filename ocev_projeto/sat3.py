@@ -7,7 +7,7 @@ from ocev_projeto.models.config import pkl_to_config
 
 
 def read_instance(name: str):
-    with (Path(f"data/instances/{name}")).open("r") as fd:
+    with (Path(f"data/instances/sat-3/{name}")).open("r") as fd:
         lines = fd.readlines()
         config = lines[0]
         problem = list(map(lambda line: line.strip().split(" ")[:-1], lines[1:-2]))
