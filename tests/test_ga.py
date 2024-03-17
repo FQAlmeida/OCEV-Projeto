@@ -1,11 +1,9 @@
 from multiprocessing import Pool
 
-import numpy as np
 import pytest
-from matplotlib.pylab import SeedSequence
 
 from ocev_projeto.ga import GA
-from ocev_projeto.models.config import Config, PopConfig, PopType, pkl_to_config
+from ocev_projeto.models.config import pkl_to_config
 from ocev_projeto.sat3 import SAT3
 
 

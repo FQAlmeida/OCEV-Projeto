@@ -1,12 +1,9 @@
-from collections.abc import Callable
-from functools import partial
 from multiprocessing.pool import Pool
 from time import time
 
 import numpy as np
 from matplotlib.pylab import SeedSequence
 
-from ocev_projeto.models.config import Config
 from ocev_projeto.population_initialization import PopGenerator
 from ocev_projeto.problem import Problem
 

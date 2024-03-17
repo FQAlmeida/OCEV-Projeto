@@ -1,13 +1,11 @@
 from multiprocessing.pool import Pool
 
-import numpy as np
 import pytest
-from numpy.random import SeedSequence
 from pytest_mock import MockerFixture
 
 from ocev_projeto.framework import GAFramework
 from ocev_projeto.ga import GA
-from ocev_projeto.models.config import Config, PopConfig, PopType, pkl_to_config
+from ocev_projeto.models.config import pkl_to_config
 from ocev_projeto.sat3 import SAT3
 
 

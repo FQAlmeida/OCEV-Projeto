@@ -1,7 +1,4 @@
-from collections.abc import Callable
 from multiprocessing import Pool, cpu_count
-
-import numpy as np
 
 from ocev_projeto.ga import GA
 from ocev_projeto.models.config import Config
