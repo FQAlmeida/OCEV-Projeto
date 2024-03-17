@@ -1,3 +1,4 @@
+import logging
 from multiprocessing import cpu_count
 from os import environ
 from pathlib import Path
@@ -15,6 +16,8 @@ environ["VECLIB_MAXIMUM_THREADS"] = N_THREADS
 environ["NUMEXPR_NUM_THREADS"] = N_THREADS
 
 if __name__ == "__main__":
+    logging.basicConfig(level="INFO")
+    logger = logging.getLogger("PROBLEM")
     questions = [
         cli_inquirer.List(
             "problem",
@@ -42,5 +45,5 @@ if __name__ == "__main__":
     problem, config = problem_factory(**awnsers)
     with GAFramework(config, problem) as ga_framework:
         best, result = ga_framework.run()
-    print(best)
-    print(result)
+    logger.info(best)
+    logger.info(result)

@@ -1,8 +1,11 @@
+import logging
 from multiprocessing import Pool, cpu_count
 
 from ocev_projeto.ga import GA
 from ocev_projeto.models.config import Config
 from ocev_projeto.problem import Problem
+
+logger = logging.getLogger('GA')
 
 
 class PoolNotInitiatedError(Exception):
@@ -33,7 +36,7 @@ class GAFramework:
             raise PoolNotInitiatedError()
         best_individual, result = (None, None)
         for run in range(self.config.qtd_runs):
-            print(f"Run {run + 1}")
+            logger.info(f"Run {run + 1}")
             ga = GA(self.problem, self.pool)
             new_indiv, new_result = ga.run()
             if not result or new_result < result:

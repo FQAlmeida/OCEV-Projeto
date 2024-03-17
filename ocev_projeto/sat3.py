@@ -1,8 +1,12 @@
+import logging
+
 import numpy as np
 
 from ocev_projeto.framework import GAFramework
 from ocev_projeto.models.config import Config, pkl_to_config
 from ocev_projeto.problem import Problem
+
+logger = logging.getLogger('PROBLEM')
 
 
 class SAT3(Problem):
@@ -30,5 +34,5 @@ if __name__ == "__main__":
     sat3 = SAT3(config, "uf100-01.cnf")
     ga_framework = GAFramework(config, sat3)
     best_individual, result = ga_framework.run()
-    print(best_individual)
-    print(result)
+    logger.info(best_individual)
+    logger.info(result)
