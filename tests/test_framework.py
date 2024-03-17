@@ -7,34 +7,24 @@ from pytest_mock import MockerFixture
 
 from ocev_projeto.framework import GAFramework
 from ocev_projeto.ga import GA
-from ocev_projeto.models.config import Config, PopConfig, PopType
+from ocev_projeto.models.config import Config, PopConfig, PopType, pkl_to_config
+from ocev_projeto.sat3 import SAT3
 
 
 @pytest.fixture
 def config():
-    config = Config(pop_config=PopConfig(30, 100, pop_type=PopType.PERMINT))
+    config = pkl_to_config("data/config/sat-3.pkl")
     return config
 
 
-def objective_function(problem: np.ndarray, individual: np.ndarray):
-    return np.sum([problem[a][b] for (a, b) in zip(individual[:-1], individual)])
-
-
 @pytest.fixture
-def objective():
-    return objective_function
-
-
-@pytest.fixture
-def problem():
-    seed_seq = SeedSequence(123)
-    rng = np.random.default_rng(seed_seq)
-    problem = rng.integers(low=0, high=30, size=(30, 30)).astype(np.int32)
+def problem(config):
+    problem = SAT3(config)
     return problem
 
 
-def test_ga_framework_run(mocker: MockerFixture, config, objective, problem):
-    framework = GAFramework(config, objective, problem)
+def test_ga_framework_run(mocker: MockerFixture, config, problem):
+    framework = GAFramework(config, problem)
     framework_run = mocker.spy(framework, "run")
     ga_run = mocker.spy(GA, "run")
     with framework as fw:
@@ -44,18 +34,16 @@ def test_ga_framework_run(mocker: MockerFixture, config, objective, problem):
     assert framework_run.call_count == 1
 
 
-def test_ga_framework_pool_close_called(
-    mocker: MockerFixture, config, objective, problem
-):
+def test_ga_framework_pool_close_called(mocker: MockerFixture, config, problem):
     framework_pool = mocker.spy(Pool, "close")
-    with GAFramework(config, objective, problem) as framework:
+    with GAFramework(config, problem) as framework:
         framework.run()
 
     assert framework_pool.call_count == 1
 
 
-def test_ga_framework_run_best_individual_result(config, objective, problem):
-    with GAFramework(config, objective, problem) as framework:
+def test_ga_framework_run_best_individual_result(config, problem):
+    with GAFramework(config, problem) as framework:
         best_individual, result = framework.run()
 
     assert best_individual is not None

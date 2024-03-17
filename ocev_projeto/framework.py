@@ -5,6 +5,7 @@ import numpy as np
 
 from ocev_projeto.ga import GA
 from ocev_projeto.models.config import Config
+from ocev_projeto.problem import Problem
 
 
 class PoolNotInitiatedError(Exception):
@@ -20,11 +21,9 @@ class GAFramework:
     def __init__(
         self,
         config: Config,
-        objective: Callable[[np.ndarray, np.ndarray], float | int],
-        problem: np.ndarray,
+        problem: Problem,
     ) -> None:
         self.config = config
-        self.objective = objective
         self.problem = problem
         self.pool = None
 
@@ -38,7 +37,7 @@ class GAFramework:
         best_individual, result = (None, None)
         for run in range(self.config.qtd_runs):
             print(f"Run {run + 1}")
-            ga = GA(self.config, self.objective, self.problem, self.pool)
+            ga = GA(self.problem, self.pool)
             new_indiv, new_result = ga.run()
             if not result or new_result < result:
                 best_individual, result = (new_indiv, new_result)
