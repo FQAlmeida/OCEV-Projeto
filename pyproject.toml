@@ -18,6 +18,7 @@ matplotlib = "^3.8.3"
 seaborn = "^0.13.2"
 pkll = "^0.1.8"
 requests = "^2.31.0"
+inquirer = "^3.2.4"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -79,3 +80,4 @@ test = "pytest tests/"
 lint = "ruff check . --fix"
 ea = "python ocev_projeto/ea_timeline.py"
 profile = "py-spy record -o data/profiler/profile.html -t -r 100 -f speedscope --subprocesses -- python"
+start = "python ./ocev_projeto/__init__.py"
