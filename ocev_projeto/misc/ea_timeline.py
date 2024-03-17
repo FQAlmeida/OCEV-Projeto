@@ -11,7 +11,7 @@ if __name__ == "__main__":
     x_min: float = df_ea["Ano"].to_numpy().astype(np.float32).min()
     x_max: float = df_ea["Ano"].to_numpy().astype(np.float32).max()
     _ = ax.set_xlim(left=x_min, right=x_max)
-    _ = ax.axhline(0, xmin=0.05, xmax=0.95, c='deeppink', zorder=1)
+    _ = ax.axhline(0, xmin=0.05, xmax=0.95, c="deeppink", zorder=1)
 
     df_agged = df_ea.group_by("Ano").agg("Nome")
     dates = df_agged["Ano"].to_numpy()
@@ -49,7 +49,11 @@ if __name__ == "__main__":
     _ = ax.set_yticks([])
 
     _ = ax.set_title(
-        "Important Milestones in Rock and Roll", fontweight="bold", fontfamily="serif", fontsize=16, color="royalblue"
+        "Important Milestones in Rock and Roll",
+        fontweight="bold",
+        fontfamily="serif",
+        fontsize=16,
+        color="royalblue",
     )
     fig.tight_layout()
     fig.savefig("data/mat.png")

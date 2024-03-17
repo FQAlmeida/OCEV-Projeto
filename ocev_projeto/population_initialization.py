@@ -26,7 +26,9 @@ class PopGenerator:
         upper = self.config.bounds.upper
         pop_size = self.config.pop_size
         dim = self.config.dim
-        return self.rng.integers(low=int(lower), high=int(upper), size=(pop_size, dim)).astype(np.int32)
+        return self.rng.integers(
+            low=int(lower), high=int(upper), size=(pop_size, dim)
+        ).astype(np.int32)
 
     def __generate_permint_pop(self):
         pop_size = self.config.pop_size
@@ -43,7 +45,9 @@ class PopGenerator:
         upper = self.config.bounds.upper
         pop_size = self.config.pop_size
         dim = self.config.dim
-        return self.rng.uniform(low=lower, high=upper, size=(pop_size, dim)).astype(np.float32)
+        return self.rng.uniform(low=lower, high=upper, size=(pop_size, dim)).astype(
+            np.float32
+        )
 
     def __generate_binary_pop(self):
         pop_size = self.config.pop_size

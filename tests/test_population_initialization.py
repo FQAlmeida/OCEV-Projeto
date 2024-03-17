@@ -17,7 +17,10 @@ def test_generate_pop_int_with_config():
     upper = 10
     lower = 0
     pop_config = PopConfig(
-        dim=dim, pop_size=pop_size, bounds=BoundConfig(lower=lower, upper=upper), pop_type=PopType.INT
+        dim=dim,
+        pop_size=pop_size,
+        bounds=BoundConfig(lower=lower, upper=upper),
+        pop_type=PopType.INT,
     )
     pop_gen = PopGenerator(pop_config, rng)
     result = pop_gen.generate_pop()
@@ -35,7 +38,11 @@ def test_generate_pop_permint_without_config():
     result = pop_gen.generate_pop()
     assert isinstance(result, np.ndarray)
     assert result.shape == (pop_size, dim)
-    assert np.all(np.apply_along_axis(lambda x: len(np.unique(x)) == len(x), axis=1, arr=result))
+    assert np.all(
+        np.apply_along_axis(
+            lambda x: len(np.unique(x)) == len(x), axis=1, arr=result
+        )
+    )
 
 
 def test_generate_pop_real_with_config():
@@ -44,7 +51,10 @@ def test_generate_pop_real_with_config():
     upper = 10
     lower = -10
     pop_config = PopConfig(
-        dim=dim, pop_size=pop_size, bounds=BoundConfig(lower=lower, upper=upper), pop_type=PopType.REAL
+        dim=dim,
+        pop_size=pop_size,
+        bounds=BoundConfig(lower=lower, upper=upper),
+        pop_type=PopType.REAL,
     )
     pop_gen = PopGenerator(pop_config, rng)
     result = pop_gen.generate_pop()
@@ -72,7 +82,9 @@ def test_generate_pop_raises_exception_without_config_for_some_types():
         PopType.REAL,
     ]
     types_that_should_not_raise_exception = [
-        pop_type for pop_type in PopType if pop_type not in types_that_should_raise_exception
+        pop_type
+        for pop_type in PopType
+        if pop_type not in types_that_should_raise_exception
     ]
     for pop_type in types_that_should_raise_exception:
         with pytest.raises(Exception):
