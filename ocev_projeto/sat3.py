@@ -6,8 +6,8 @@ from ocev_projeto.problem import Problem
 
 
 class SAT3(Problem):
-    def __init__(self, config: Config) -> None:
-        super().__init__("SAT-3", "uf100-01.cnf", config)
+    def __init__(self, config: Config, instance: str) -> None:
+        super().__init__("SAT-3", instance, config)
 
     def objective(self, individual: np.ndarray):
         def evaluate(p):
@@ -24,10 +24,15 @@ class SAT3(Problem):
         return np.count_nonzero(solution)
 
 
-if __name__ == "__main__":
+def create_sat3_ga():
     config = pkl_to_config("data/config/sat-3.pkl")
-    sat3 = SAT3(config)
+    sat3 = SAT3(config, "uf100-01.cnf")
     ga_framework = GAFramework(config, sat3)
+    return ga_framework
+
+
+if __name__ == "__main__":
+    ga_framework = create_sat3_ga()
     best_individual, result = ga_framework.run()
     print(best_individual)
     print(result)

@@ -15,7 +15,7 @@ def config():
 
 @pytest.fixture
 def problem(config):
-    problem = SAT3(config)
+    problem = SAT3(config, "uf100-01.cnf")
     return problem
 
 

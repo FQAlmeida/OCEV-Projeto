@@ -9,7 +9,8 @@ class Problem:
     def __init__(self, name: str, instance: str, config: Config) -> None:
         self.instance = instance
         self.name = name
-        _, problem, expected_solution = self.read_instance()
+        config_line, problem, expected_solution = self.read_instance()
+        self.config_line = config_line
         self.problem = problem
         self.config = config
         self.expected_solution = expected_solution

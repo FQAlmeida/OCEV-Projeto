@@ -4,6 +4,9 @@ from pathlib import Path
 
 import inquirer as cli_inquirer
 
+from ocev_projeto.framework import GAFramework
+from ocev_projeto.problem_factory import problem_factory
+
 N_THREADS = f"{cpu_count()}"
 environ["OMP_NUM_THREADS"] = N_THREADS
 environ["OPENBLAS_NUM_THREADS"] = N_THREADS
@@ -27,5 +30,17 @@ if __name__ == "__main__":
             ),
         ),
     ]
+
+    class EmptyAnswersError(Exception):
+        def __init__(self) -> None:
+            super().__init__("Answers is empty")
+
     awnsers = cli_inquirer.prompt(questions)
-    print(awnsers)
+    if not awnsers:
+        raise EmptyAnswersError()
+
+    problem, config = problem_factory(**awnsers)
+    ga_framework = GAFramework(config, problem)
+    best, result = ga_framework.run()
+    print(best)
+    print(result)
