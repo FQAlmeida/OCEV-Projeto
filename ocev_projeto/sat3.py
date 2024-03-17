@@ -1,9 +1,8 @@
-from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 import numpy as np
 
-from ocev_projeto.ga import GA
+from ocev_projeto.framework import GAFramework
 from ocev_projeto.models.config import pkl_to_config
 
 
@@ -18,6 +17,8 @@ def read_instance(name: str):
         return config, problem, expected_solution
 
 
+# TODO(Otávio): Create a Problem Class
+# 001
 def objective(problem: np.ndarray, individual: np.ndarray):
     def evaluate(p):
         xs_abs = np.abs(p) - 1
@@ -36,14 +37,7 @@ def objective(problem: np.ndarray, individual: np.ndarray):
 if __name__ == "__main__":
     config_line, problem, expected_solution = read_instance("uf100-01.cnf")
     config = pkl_to_config("data/config/sat3.pkl")
-    pool = Pool(cpu_count())
-    indiv, result = (None, None)
-    for run in range(config.qtd_runs):
-        print(f"Run {run + 1}")
-        ga = GA(config, objective, problem, pool)
-        new_indiv, new_result = ga.run()
-        if not result or new_result < result:
-            indiv, result = (new_indiv, new_result)
-    pool.close()
-    print(indiv)
+    ga_framework = GAFramework(config, objective, problem)
+    best_individual, result = ga_framework.run()
+    print(best_individual)
     print(result)
