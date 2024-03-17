@@ -24,15 +24,10 @@ class SAT3(Problem):
         return np.count_nonzero(solution)
 
 
-def create_sat3_ga():
+if __name__ == "__main__":
     config = pkl_to_config("data/config/sat-3.pkl")
     sat3 = SAT3(config, "uf100-01.cnf")
     ga_framework = GAFramework(config, sat3)
-    return ga_framework
-
-
-if __name__ == "__main__":
-    ga_framework = create_sat3_ga()
     best_individual, result = ga_framework.run()
     print(best_individual)
     print(result)
