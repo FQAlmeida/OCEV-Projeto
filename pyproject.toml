@@ -16,6 +16,8 @@ pyarrow = "^15.0.1"
 kaleido = ">=0.2.1, !=0.2.1.post1"
 matplotlib = "^3.8.3"
 seaborn = "^0.13.2"
+pkll = "^0.1.8"
+requests = "^2.31.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -23,6 +25,7 @@ taskipy = "^1.12.2"
 pytest = "^8.0.2"
 pytest-cov = "^4.1.0"
 ruff = "^0.3.2"
+py-spy = "^0.3.14"
 
 [build-system]
 requires = ["poetry-core"]
@@ -30,7 +33,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 target-version = "py311"
-line-length = 118
+line-length = 85
 preview = true
 output-format = "full"
 include = ["**/*.py", "**/*.pyi", "**/pyproject.toml", "*.ipynb"]
@@ -75,3 +78,4 @@ exclude_lines = [
 test = "pytest tests/"
 lint = "ruff check . --fix"
 ea = "python ocev_projeto/ea_timeline.py"
+profile = "py-spy record -o data/profiler/profile.html -t -r 100 -f speedscope --subprocesses -- python"
