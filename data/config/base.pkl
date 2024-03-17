@@ -1,0 +1,39 @@
+module ConfigTemplate
+
+typealias PopType = "int" | "permint" | "real" | "binary"
+
+class BoundConfig {
+    upper: Float
+    lower: Float
+}
+
+class PopConfig {
+    dim: Int
+    pop_size: Int
+    pop_type: PopType
+    bounds: BoundConfig?
+}
+
+class Config {
+    pop_config: PopConfig = new PopConfig{
+        dim=100
+        pop_size=30
+        pop_type="binary"
+        bounds=null
+    }
+    qtd_gen: Int = 1
+    qtd_runs: Int = 1
+    elitism: Boolean = false
+}
+
+config = new Config {
+    qtd_gen= 1
+    qtd_runs= 1
+    elitism=false
+    pop_config=new PopConfig{
+        dim=100
+        pop_size=30
+        pop_type="binary"
+        bounds=null
+    }
+}
