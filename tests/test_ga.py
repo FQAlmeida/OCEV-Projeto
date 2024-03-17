@@ -26,7 +26,7 @@ def test_run(
     ga = GA(problem, pool)
     best_individual, best_individual_value = ga.run()
     assert best_individual is not None
-    assert best_individual.shape == (30,)
+    assert best_individual.shape == (100,)
     assert best_individual_value is not None
 
 

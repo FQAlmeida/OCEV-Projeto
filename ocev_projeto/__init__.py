@@ -40,7 +40,7 @@ if __name__ == "__main__":
         raise EmptyAnswersError()
 
     problem, config = problem_factory(**awnsers)
-    ga_framework = GAFramework(config, problem)
-    best, result = ga_framework.run()
+    with GAFramework(config, problem) as ga_framework:
+        best, result = ga_framework.run()
     print(best)
     print(result)

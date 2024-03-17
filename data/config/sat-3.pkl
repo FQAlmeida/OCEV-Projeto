@@ -2,11 +2,11 @@ amends "base.pkl"
 
 config = new Config {
     qtd_gen=100
-    qtd_runs=10
+    qtd_runs=3
     elitism=false
     pop_config=new PopConfig{
         dim=100
-        pop_size=300
+        pop_size=30
         pop_type="binary"
         bounds=null
     }

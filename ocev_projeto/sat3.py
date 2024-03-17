@@ -8,6 +8,7 @@ from ocev_projeto.problem import Problem
 class SAT3(Problem):
     def __init__(self, config: Config, instance: str) -> None:
         super().__init__("SAT-3", instance, config)
+        self.config.pop_config.dim = int(self.config_line.split(" ")[2])
 
     def objective(self, individual: np.ndarray):
         def evaluate(p):
