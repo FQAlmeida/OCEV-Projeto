@@ -7,10 +7,10 @@ class ProblemNotFoundError(Exception):
         super().__init__(f"Problema {problem} não encontrado")
 
 
-def problem_factory(problem: str, instance: str):
+def problem_factory(problem: str, instance: str, config_path: str):
+    config = pkl_to_config(config_path)
     match problem.upper():
         case "SAT-3":
-            config = pkl_to_config("data/config/sat-3.pkl")
             sat3 = SAT3(config, instance)
             return sat3, config
     raise ProblemNotFoundError(problem)

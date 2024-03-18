@@ -32,6 +32,14 @@ if __name__ == "__main__":
                 Path(f"data/instances/{awnsers['problem'].lower()}").glob("*"),
             ),
         ),
+        cli_inquirer.List(
+            "config_path",
+            message="Qual a configuração do problema?",
+            choices=lambda awnsers: map(
+                lambda file: (file.name, file.absolute()),
+                Path("data/config/").glob(f"{awnsers['problem'].lower()}*.pkl"),
+            ),
+        ),
     ]
 
     class EmptyAnswersError(Exception):

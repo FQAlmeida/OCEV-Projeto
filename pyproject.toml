@@ -16,9 +16,10 @@ pyarrow = "^15.0.1"
 kaleido = ">=0.2.1, !=0.2.1.post1"
 matplotlib = "^3.8.3"
 seaborn = "^0.13.2"
-pkll = "^0.1.8"
+pkll = "^0.1.8, !=0.1.9"
 requests = "^2.31.0"
 inquirer = "^3.2.4"
+typed-argument-parser = "^1.9.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -82,3 +83,4 @@ lint = "ruff check . --fix"
 ea = "python ocev_projeto/ea_timeline.py"
 profile = "py-spy record -o data/profiler/profile.html -t -r 100 -f speedscope --subprocesses -- python"
 start = "python ./ocev_projeto/__init__.py"
+sat = "python ocev_projeto/cli.py --problem=SAT-3 --instance=uf100-01.cnf --config-path=data/config/sat-3-uf100-01.pkl"

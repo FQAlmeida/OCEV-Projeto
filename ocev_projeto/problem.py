@@ -1,3 +1,5 @@
+import errno
+import os
 from pathlib import Path
 
 import numpy as np
@@ -16,9 +18,14 @@ class Problem:
         self.expected_solution = expected_solution
 
     def read_instance(self):
-        with (
-            Path(f"data/instances/{self.name.lower()}/{self.instance.lower()}")
-        ).open("r") as fd:
+        instance_path = Path(
+            f"data/instances/{self.name.lower()}/{self.instance.lower()}"
+        )
+        if instance_path.is_file() is False:
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), instance_path
+            )
+        with (instance_path).open("r") as fd:
             lines = fd.readlines()
             config = lines[0]
             problem = list(
