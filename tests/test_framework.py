@@ -11,7 +11,7 @@ from ocev_projeto.sat3 import SAT3
 
 @pytest.fixture
 def config():
-    config = pkl_to_config("data/config/sat-3.pkl")
+    config = pkl_to_config("data/config/sat-3-uf100-01.pkl")
     return config
 
 

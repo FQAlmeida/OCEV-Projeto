@@ -7,7 +7,7 @@ from ocev_projeto.problem import Problem
 
 @pytest.fixture
 def config():
-    config = pkl_to_config("data/config/sat-3.pkl")
+    config = pkl_to_config("data/config/sat-3-uf100-01.pkl")
     return config
 
 

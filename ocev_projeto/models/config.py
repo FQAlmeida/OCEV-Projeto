@@ -63,7 +63,6 @@ def pkl_to_config(pkl_path: str) -> Config:
     config_path = Path(pkl_path)
     if config_path.is_file() is False:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), config_path)
-    print(f"file:///{config_path.absolute()}")
     pkl_config = pkll.load(f"file:///{config_path.absolute()}")
     config: Config = Config(
         pop_config=PopConfig(
