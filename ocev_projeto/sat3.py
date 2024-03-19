@@ -15,22 +15,18 @@ class SAT3(Problem):
         self.config.pop_config.dim = int(self.config_line.split(" ")[2])
 
     def objective(self, chromossome: np.ndarray):
-        xs_abs = np.abs(self.problem) - 1
-        xs_neg = self.problem < 0
+        clausula_id = np.abs(self.problem) - 1
+        clausula_neg = self.problem < 0
 
         def evaluate(p):
-            print(p)
-            xs_bool = [chromossome[x] for x in p]
-            print(xs_bool)
-            print(xs_neg)
-            xs_bool = [
-                (x[1] and not xs_neg[x[0]]) or (not x[1] and xs_neg[x[0]])
-                for x in enumerate(xs_bool)
-            ]
-            print(xs_bool)
-            return any(list(xs_bool)) is False
+            return np.array([chromossome[x] for x in p])
 
-        solution = np.apply_along_axis(evaluate, 1, xs_abs)
+        solution = np.apply_along_axis(evaluate, 1, clausula_id)
+        solution = np.logical_or(
+            np.logical_and(clausula_neg, np.logical_not(solution)),
+            np.logical_and(np.logical_not(clausula_neg), solution),
+        )
+        solution = np.logical_not(np.apply_along_axis(np.any, 1, solution))
         return np.count_nonzero(solution)
 
 

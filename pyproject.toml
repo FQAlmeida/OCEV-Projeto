@@ -81,6 +81,6 @@ exclude_lines = [
 test = "pytest tests/"
 lint = "ruff check . --fix"
 ea = "python ocev_projeto/ea_timeline.py"
-profile = "py-spy record -o data/profiler/profile.html -t -r 100 -f speedscope --subprocesses -- python"
+profile = "py-spy record -o data/profiler/profile.json -t -r 100 -f speedscope --subprocesses --"
 start = "python ./ocev_projeto/__init__.py"
 sat = "python ocev_projeto/cli.py --problem=SAT-3 --instance=uf100-01.cnf --config-path=data/config/sat-3-uf100-01.pkl"

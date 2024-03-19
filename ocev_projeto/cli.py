@@ -1,4 +1,6 @@
 import logging
+from multiprocessing import cpu_count
+from os import environ
 from pathlib import Path
 from typing import Literal
 
@@ -6,6 +8,13 @@ from tap import Tap
 
 from ocev_projeto.framework import GAFramework
 from ocev_projeto.problem_factory import problem_factory
+
+N_THREADS = f"{cpu_count()}"
+environ["OMP_NUM_THREADS"] = N_THREADS
+environ["OPENBLAS_NUM_THREADS"] = N_THREADS
+environ["MKL_NUM_THREADS"] = N_THREADS
+environ["VECLIB_MAXIMUM_THREADS"] = N_THREADS
+environ["NUMEXPR_NUM_THREADS"] = N_THREADS
 
 if __name__ == "__main__":
     logging.basicConfig(level="INFO")
