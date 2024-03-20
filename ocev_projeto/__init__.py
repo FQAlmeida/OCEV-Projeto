@@ -1,6 +1,4 @@
 import logging
-from multiprocessing import cpu_count
-from os import environ
 from pathlib import Path
 
 import inquirer as cli_inquirer

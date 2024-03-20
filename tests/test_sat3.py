@@ -39,5 +39,3 @@ def test_objective_case3(config):
     individual = np.array([0, 0, 1, 1, 0])
     qtd_conflicts = 5
     assert sat3.objective(individual) == qtd_conflicts
-
-

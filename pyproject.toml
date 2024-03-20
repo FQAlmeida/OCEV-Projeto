@@ -39,6 +39,8 @@ build-backend = "poetry.core.masonry.api"
 target-version = "py311"
 line-length = 85
 preview = true
+fix = true
+unsafe-fixes = true
 output-format = "full"
 include = ["**/*.py", "**/*.pyi", "**/pyproject.toml", "*.ipynb"]
 lint.select = [
@@ -80,7 +82,7 @@ exclude_lines = [
 
 [tool.taskipy.tasks]
 test = "pytest tests/"
-lint = "ruff check . --fix"
+lint = "ruff check ."
 ea = "python ocev_projeto/ea_timeline.py"
 profile = "py-spy record -o data/profiler/profile.json -t -r 100 -f speedscope --subprocesses --"
 start = "python ./ocev_projeto/__init__.py"

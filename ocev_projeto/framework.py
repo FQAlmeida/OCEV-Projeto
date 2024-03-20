@@ -5,7 +5,7 @@ from ocev_projeto.ga import GA
 from ocev_projeto.models.config import Config
 from ocev_projeto.problem import Problem
 
-logger = logging.getLogger('GA')
+logger = logging.getLogger("GA")
 
 
 class PoolNotInitiatedError(Exception):
