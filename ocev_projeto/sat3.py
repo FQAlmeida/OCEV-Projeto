@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-from numba import jit
 
 from ocev_projeto.framework import GAFramework
 from ocev_projeto.models.config import Config, pkl_to_config
@@ -16,21 +15,17 @@ class SAT3(Problem):
         self.config.pop_config.dim = int(self.config_line.split(" ")[2])
 
     def objective(self, chromossome: np.ndarray):
-        @jit
-        def obj(chromossome: np.ndarray, problem: np.ndarray):
+        def obj(c: np.ndarray = np.array([]), problem: np.ndarray = np.array([[]])):
             clausula_id = np.abs(problem) - 1
             clausula_neg = problem < 0
-
-            def evaluate(p):
-                return np.array([chromossome[x] for x in p])
-
-            solution = np.apply_along_axis(evaluate, 1, clausula_id)
+            solution = c[clausula_id]
             solution = np.logical_or(
                 np.logical_and(clausula_neg, np.logical_not(solution)),
                 np.logical_and(np.logical_not(clausula_neg), solution),
             )
             solution = np.logical_not(np.apply_along_axis(np.any, 1, solution))
             return np.count_nonzero(solution)
+
         return obj(chromossome, self.problem)
 
 

@@ -31,7 +31,11 @@ class GA:
                 not self.best_individual_index[1]
                 or best_individual_index[1] > self.best_individual_index[1]
             ):
-                self.best_individual_index = best_individual_index
+                self.best_individual_index = (
+                    self.population[best_individual_index[0]],
+                    best_individual_index[1],
+                )
+            self.population = self.pop_generator.generate_pop()
         return self.best_individual, self.best_individual_value
 
     def __fitness(self, population: np.ndarray):
@@ -40,9 +44,9 @@ class GA:
 
     @property
     def best_individual(self):
-        if self.best_individual_index == (None, None):
+        if self.best_individual_index[1] is None:
             return None
-        return self.population[self.best_individual_index[0]]
+        return self.best_individual_index[0]
 
     @property
     def best_individual_value(self):
