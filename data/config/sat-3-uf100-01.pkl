@@ -2,11 +2,15 @@ amends "base.pkl"
 
 config = new Config {
     qtd_gen=100
-    qtd_runs=3
+    qtd_runs=5
     elitism=false
+    selection_method = "roulette"
+    crossover_method = "one-point"
+    crossover_chance = 1.0
+    mutation_chance = 0.05
     pop_config=new PopConfig{
         dim=100
-        pop_size=30
+        pop_size=300
         pop_type="binary"
         bounds=null
     }
