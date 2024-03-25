@@ -24,7 +24,7 @@ class SAT3(Problem):
                 np.logical_and(np.logical_not(clausula_neg), solution),
             )
             solution = np.logical_not(np.apply_along_axis(np.any, 1, solution))
-            return np.count_nonzero(solution)
+            return np.count_nonzero(np.logical_not(solution))
 
         return obj(chromossome, self.problem)
 

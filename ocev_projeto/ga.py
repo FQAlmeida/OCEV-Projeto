@@ -29,7 +29,9 @@ class GA:
     def run(self):
         for _ in range(self.problem.config.qtd_gen):
             result = self.__fitness()
-            ranked_results = sorted(enumerate(result), key=lambda x: x[1])
+            ranked_results = sorted(
+                enumerate(result), key=lambda x: x[1], reverse=True
+            )
             best_individual_index = ranked_results[0]
             if (
                 not self.best_individual_index[1]
@@ -75,14 +77,27 @@ class GA:
         crossover_chance = self.problem.config.crossover_chance
         match pop_type:
             case PopType.BINARY:
-                mating_pool = mating_pool.reshape(-1, 2, dim)
-                mask = self.rng.random((pop_size // 2, dim)) < crossover_chance
-                cut = self.rng.choice(dim, (pop_size // 2, 1))
-                mask = np.concatenate(
-                    (np.arange(dim).reshape(1, -1) < cut, mask), axis=1
+                mating_pairs = mating_pool.reshape(-1, 2, dim)
+                crossover_picks = (
+                    self.rng.random((pop_size // 2, 1)) < crossover_chance
                 )
-                mating_pool = np.where(
-                    mask, mating_pool, np.roll(mating_pool, 1, axis=1)
+
+                mask = np.tile(crossover_picks, (1, dim))
+                cut = np.tile(self.rng.choice(dim, (pop_size // 2, 1)), (1, dim))
+                crossover_points = np.tile(np.arange(dim), (pop_size // 2, 1))
+                crossover_points = crossover_points < cut
+                mating_pool_left = np.where(
+                    mask & crossover_points,
+                    mating_pairs[:, 0, :],
+                    mating_pairs[:, 1, :],
+                )
+                mating_pool_right = np.where(
+                    mask & crossover_points,
+                    mating_pairs[:, 1, :],
+                    mating_pairs[:, 0, :],
+                )
+                mating_pool = np.concatenate(
+                    (mating_pool_left, mating_pool_right), axis=1
                 )
                 mating_pool = mating_pool.reshape(-1, dim)
                 return mating_pool
