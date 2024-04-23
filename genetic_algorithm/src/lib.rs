@@ -1,7 +1,9 @@
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::{Individual, IndividualType, Population};
 use loader_config::Config;
 use problem::Problem;
-use rand::Rng;
+use rand::{rngs::OsRng, Rng};
+use rand_unique::{RandomSequence, RandomSequenceBuilder};
 use rayon::iter::{once, IntoParallelRefIterator, ParallelIterator};
 
 pub struct GA<'a> {
@@ -10,10 +12,16 @@ pub struct GA<'a> {
     pub population: Population,
     pub best_individual_index: Option<usize>,
     pub best_individual_value: Option<f64>,
+    multi_progress_bar: &'a MultiProgress,
+    generations_without_improvement: usize,
 }
 
 impl<'a> GA<'a> {
-    pub fn new(problem: &'a Box<dyn Problem + Sync + Send>, config: &'a Config) -> Self {
+    pub fn new(
+        problem: &'a Box<dyn Problem + Sync + Send>,
+        config: &'a Config,
+        multi_progress_bar: &'a MultiProgress,
+    ) -> Self {
         let population = Population::new(
             config.pop_config.pop_size,
             config.pop_config.dim,
@@ -23,12 +31,14 @@ impl<'a> GA<'a> {
             problem,
             config,
             population,
+            multi_progress_bar,
             best_individual_index: None,
             best_individual_value: None,
+            generations_without_improvement: 0,
         }
     }
     fn evaluate(&self) -> Vec<f64> {
-        let population = self.population.individuals.clone();
+        let population = &self.population.individuals;
         let fitness = population
             .par_iter()
             .map(|individual| self.problem.fitness(individual))
@@ -44,7 +54,7 @@ impl<'a> GA<'a> {
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .unwrap()
             .0;
-        let worst_individual = result
+        let worst_individual_index = result
             .iter()
             .enumerate()
             .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
@@ -56,10 +66,11 @@ impl<'a> GA<'a> {
                     self.best_individual_value = Some(result[best_individual_index]);
                     self.best_individual_index = Some(best_individual_index);
                 } else {
+                    self.generations_without_improvement += 1;
                     if self.config.elitism {
-                        self.population.individuals[worst_individual] =
-                            self.best_individual().unwrap();
-                        new_result[worst_individual] = self.best_individual_value.unwrap();
+                        self.population.individuals[worst_individual_index] =
+                            self.best_individual().unwrap().clone();
+                        new_result[worst_individual_index] = self.best_individual_value.unwrap();
                     }
                 }
             }
@@ -71,11 +82,32 @@ impl<'a> GA<'a> {
         return new_result;
     }
 
-    fn best_individual(&self) -> Option<Individual> {
+    fn best_individual(&self) -> Option<&Individual> {
         match self.best_individual_index {
-            Some(index) => Some(self.population.individuals[index].clone()),
+            Some(index) => Some(&self.population.individuals[index]),
             None => None,
         }
+    }
+
+    fn genocide(&mut self) -> Vec<f64> {
+        self.generations_without_improvement = 0;
+        let new_population = Population::new(
+            self.config.pop_config.pop_size / 2,
+            self.config.pop_config.dim,
+            &IndividualType::Binary(true),
+        );
+        let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
+        let mut sequence: RandomSequence<u16> = config.into_iter();
+        (0..self.config.pop_config.pop_size / 2)
+            .map(|_| (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size)
+            .for_each(|index| {
+                self.population.individuals[index] = new_population.individuals
+                    [index % (self.config.pop_config.pop_size / 2)]
+                    .clone();
+            });
+        let result = self.evaluate();
+        let new_result = self.update_best(result);
+        return new_result;
     }
     fn selection(&self, result: Vec<f64>) -> Vec<(usize, usize)> {
         let pop_size = self.config.pop_config.pop_size;
@@ -153,7 +185,7 @@ impl<'a> GA<'a> {
                 if mutation <= mutation_chance {
                     return gene.mutate();
                 }
-                return gene.clone();
+                return *gene;
             });
             return Individual {
                 chromosome: new_individual.collect(),
@@ -165,22 +197,68 @@ impl<'a> GA<'a> {
         return population;
     }
 
-    pub fn run(&mut self) -> (Option<Individual>, Option<f64>) {
-        for _ in 1..=self.config.qtd_gen {
+    fn log_run_result(&self) {
+        match self.best_individual() {
+            Some(best_individual) => {
+                tracing::info!("Best Individual: {:?}", best_individual.chromosome);
+                tracing::info!(
+                    "Best Individual Value: {}",
+                    self.best_individual_value.unwrap()
+                );
+                tracing::info!(
+                    "Best Individual Value Decoded: {}",
+                    self.problem
+                        .objective(&self.problem.decode(best_individual))
+                );
+                tracing::info!(
+                    "Best Individual Decoded: {:?}",
+                    self.problem.decode(best_individual)
+                );
+                tracing::info!(
+                    "Best Individual Constraint: {}",
+                    self.problem
+                        .constraint(&self.problem.decode(best_individual))
+                );
+            }
+            None => {}
+        };
+    }
+    fn log_generation(&self, generation: usize, result: &Vec<f64>) {
+        tracing::info!(
+            "State Individual: {} {} {} {} {}",
+            generation,
+            self.best_individual_value.unwrap(),
+            result.iter().max_by(|a, b| a.total_cmp(b)).unwrap_or(&0.0),
+            result.iter().sum::<f64>()/ result.len() as f64,
+            result.iter().min_by(|a, b| a.total_cmp(b)).unwrap_or(&0.0),
+        );
+    }
+
+    pub fn run(&mut self) -> (Option<&Individual>, Option<f64>) {
+        let sty = ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .unwrap();
+        let pb = self
+            .multi_progress_bar
+            .add(ProgressBar::new(self.config.qtd_gen.try_into().unwrap()));
+        pb.set_style(sty);
+
+        for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
-            let new_result = self.update_best(result);
-            //     if (
-            //         self.counter_to_genocide
-            //         >= self.problem.config.generations_to_genocide
-            //     ):
-            //         result = self.genocide()
-            //     self.log_generation(generation, result)
+            let mut new_result = self.update_best(result);
+            if self.generations_without_improvement >= self.config.generations_to_genocide {
+                new_result = self.genocide();
+            }
+            self.log_generation(generation, &new_result);
             let mating_pool = self.selection(new_result);
             let mut new_population = self.crossover(mating_pool);
             new_population = self.mutation(new_population);
             self.population = new_population;
-            // self.log_run_result()
+            self.log_run_result();
+            pb.inc(1)
         }
+        pb.finish_with_message("Run completed");
         return (self.best_individual(), self.best_individual_value);
     }
 }

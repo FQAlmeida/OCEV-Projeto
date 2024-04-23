@@ -1,8 +1,18 @@
+use std::fmt::Display;
+
 use rand::Rng;
 
 #[derive(Clone, Copy, Debug)]
 pub enum IndividualType {
     Binary(bool),
+}
+
+impl Display for IndividualType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IndividualType::Binary(value) => write!(f, "{}", value),
+        }
+    }
 }
 
 impl Into<bool> for IndividualType {

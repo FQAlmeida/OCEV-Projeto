@@ -1,0 +1,16 @@
+[package]
+name = "ga_cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+inquire = {version = "0.7.5"}
+anyhow = {version = "1.0.82"}
+problem_factory = {path="../problem_factory"}
+genetic_framework = {path="../genetic_framework"}
+tracing = {version = "0.1.40"}
+tracing-subscriber = {version = "0.3.18"}
+tokio = {version = "1.37.0", features = ["full"]}
+tracing-appender = {version = "0.2.3"}

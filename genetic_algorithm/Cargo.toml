@@ -11,3 +11,6 @@ loader_config = {path="../loader_config"}
 problem = {path="../problem"}
 rayon = { version = "1.10.0"}
 rand = { version = "0.8.5"}
+indicatif = {version = "0.17.8"}
+rand-unique = {version = "0.2.2"}
+tracing = {version = "0.1.40"}

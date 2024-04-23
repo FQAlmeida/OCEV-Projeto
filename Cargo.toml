@@ -7,5 +7,5 @@ members = [
     "problem", 
     "sat_3",
     "loader_config"
-]
+, "problem_factory", "ga_cli"]
 resolver = "2"

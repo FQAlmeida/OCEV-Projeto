@@ -80,7 +80,7 @@ impl Config {
             },
             qtd_gen: 5000,
             qtd_runs: 10,
-            generations_to_genocide: 200,
+            generations_to_genocide: 150,
             elitism: true,
             selection_method: SelectionMethod::TOURNAMENT,
             crossover_method: CrossOverMethod::OnePoint,

@@ -1,13 +1,11 @@
 [package]
-name = "genetic_framework"
+name = "problem_factory"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-genetic_algorithm = {path = "../genetic_algorithm"}
+sat_3 = {path = "../sat_3"}
 problem = {path = "../problem"}
 loader_config = {path = "../loader_config"}
-individual_creation = {path = "../individual_creation"}
-indicatif = {version = "0.17.8"}
