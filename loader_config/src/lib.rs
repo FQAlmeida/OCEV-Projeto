@@ -74,18 +74,18 @@ impl Config {
         return Ok(Config {
             pop_config: PopConfig {
                 dim: 100,
-                pop_size: 40,
+                pop_size: 50,
                 pop_type: PopType::BINARY,
                 bounds: None,
             },
-            qtd_gen: 3000,
-            qtd_runs: 3,
+            qtd_gen: 5000,
+            qtd_runs: 10,
             generations_to_genocide: 200,
             elitism: true,
             selection_method: SelectionMethod::TOURNAMENT,
             crossover_method: CrossOverMethod::OnePoint,
-            crossover_chance: 0.9,
-            mutation_chance: 0.03,
+            crossover_chance: 0.85,
+            mutation_chance: 0.025,
             constraint_penalty: -1.0,
             kp: 0.9,
         });

@@ -111,11 +111,11 @@ where
 
 fn main() {
     let config =
-        Config::load(r"C:\Users\otavi\projects\Rust-OCEV-Projeto\data\config\sat-3-uf100-01-2.pkl")
+        Config::load(r"data\config\sat-3-uf100-01-2.pkl")
             .unwrap();
 
     let problem =
-        read_lines(r"C:\Users\otavi\projects\Rust-OCEV-Projeto\data\instances\sat-3\uf100-01.cnf")
+        read_lines(r"data\instances\sat-3\uf100-01.cnf")
             .unwrap()
             .map(|line| {
                 let line = line.unwrap();
