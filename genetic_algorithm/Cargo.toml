@@ -1,0 +1,13 @@
+[package]
+name = "genetic_algorithm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+individual_creation = {path = "../individual_creation"}
+loader_config = {path="../loader_config"}
+problem = {path="../problem"}
+rayon = { version = "1.10.0"}
+rand = { version = "0.8.5"}

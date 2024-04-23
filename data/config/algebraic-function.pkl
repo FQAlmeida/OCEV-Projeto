@@ -1,0 +1,20 @@
+amends "base.pkl"
+
+config = new Config {
+    qtd_gen=150
+    qtd_runs=50
+    elitism=true
+    selection_method = "tournament"
+    crossover_method = "one-point"
+    crossover_chance = 0.90
+    mutation_chance = 0.02
+    constraint_factor = -1.0
+    generations_to_genocide = 15
+    kp = 1.0
+    pop_config=new PopConfig{
+        dim=16
+        pop_size=30
+        pop_type="binary"
+        bounds=null
+    }
+}

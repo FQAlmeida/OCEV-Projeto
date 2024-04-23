@@ -1,0 +1,11 @@
+[workspace] 
+members = [
+    "genetic_algorithm", 
+    "genetic_framework", 
+    "individual_creation", 
+    "loader_config", 
+    "problem", 
+    "sat_3",
+    "loader_config"
+]
+resolver = "2"

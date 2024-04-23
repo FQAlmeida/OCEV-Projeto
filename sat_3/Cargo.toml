@@ -1,0 +1,13 @@
+[package]
+name = "sat_3"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+problem = {path = "../problem"}
+genetic_framework = {path = "../genetic_framework"}
+loader_config = {path = "../loader_config"}
+individual_creation = {path = "../individual_creation"}
+rayon = {version = "1.10"}

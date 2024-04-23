@@ -1,0 +1,55 @@
+module ConfigTemplate
+
+typealias PopType = "int" | "permint" | "real" | "binary"
+typealias SelectionMethod = "roulette" | "tournament"
+typealias CrossOverMethod = "one-point"
+
+class BoundConfig {
+    upper: Float
+    lower: Float
+}
+
+class PopConfig {
+    dim: Int
+    pop_size: Int
+    pop_type: PopType
+    bounds: BoundConfig?
+}
+
+class Config {
+    pop_config: PopConfig = new PopConfig{
+        dim=100
+        pop_size=30
+        pop_type="binary"
+        bounds=null
+    }
+    qtd_gen: Int = 1
+    qtd_runs: Int = 1
+    selection_method: SelectionMethod = "roulette"
+    crossover_method: CrossOverMethod = "one-point"
+    crossover_chance: Float = 1.0
+    mutation_chance: Float = 0.05
+    constraint_factor: Float = -1.0
+    elitism: Boolean = false
+    generations_to_genocide: Int = 25
+    kp: Float = 1.0
+}
+
+config = new Config {
+    qtd_gen= 1
+    qtd_runs= 1
+    elitism=false
+    selection_method = "roulette"
+    crossover_method = "one-point"
+    crossover_chance = 1.0
+    mutation_chance = 0.05
+    constraint_factor = -1.0
+    generations_to_genocide = 25
+    kp = 1.0
+    pop_config=new PopConfig{
+        dim=100
+        pop_size=30
+        pop_type="binary"
+        bounds=null
+    }
+}
