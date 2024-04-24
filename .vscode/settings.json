@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "appender",
         "canonicalize",
+        "chrono",
         "indicatif",
         "ocev",
-        "projeto"
+        "projeto",
+        "rngs"
     ]
 }

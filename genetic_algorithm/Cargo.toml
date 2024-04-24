@@ -14,3 +14,5 @@ rand = { version = "0.8.5"}
 indicatif = {version = "0.17.8"}
 rand-unique = {version = "0.2.2"}
 tracing = {version = "0.1.40"}
+log = {version = "0.4.21"}
+anyhow = {version="1.0.82"}

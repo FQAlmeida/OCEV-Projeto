@@ -10,7 +10,7 @@ pub enum IndividualType {
 impl Display for IndividualType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IndividualType::Binary(value) => write!(f, "{}", value),
+            IndividualType::Binary(value) => write!(f, "{}", *value),
         }
     }
 }

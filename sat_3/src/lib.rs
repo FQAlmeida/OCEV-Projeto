@@ -33,11 +33,7 @@ impl Problem for SAT3 {
             .iter()
             .map(|i| match i {
                 IndividualType::Binary(value) => {
-                    if *value {
-                        return 1.0;
-                    } else {
-                        return 0.0;
-                    }
+                    return *value as u32 as f64;
                 }
             })
             .collect();

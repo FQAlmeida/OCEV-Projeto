@@ -1,6 +1,10 @@
+use std::fmt::{Display, Error, Formatter};
+
+use anyhow::Result;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::{Individual, IndividualType, Population};
 use loader_config::Config;
+use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
@@ -14,6 +18,26 @@ pub struct GA<'a> {
     pub best_individual_value: Option<f64>,
     multi_progress_bar: &'a MultiProgress,
     generations_without_improvement: usize,
+}
+
+struct IndividualTypeVecDisplay(Vec<IndividualType>);
+
+impl Display for IndividualTypeVecDisplay {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        let mut comma_separated = String::from("[");
+
+        for num in &self.0[0..self.0.len() - 1] {
+            match num {
+                IndividualType::Binary(value) => {
+                    comma_separated.push_str(value.to_string().as_str());
+                    comma_separated.push_str(", ");
+                }
+            }
+        }
+
+        comma_separated.push_str(&self.0[self.0.len() - 1].to_string().as_str());
+        write!(f, "{}]", comma_separated)
+    }
 }
 
 impl<'a> GA<'a> {
@@ -46,7 +70,7 @@ impl<'a> GA<'a> {
         return fitness;
     }
 
-    fn update_best(&mut self, result: Vec<f64>) -> Vec<f64> {
+    fn update_best(&mut self, result: &Vec<f64>) -> Vec<f64> {
         let mut new_result = result.clone();
         let best_individual_index = result
             .iter()
@@ -70,7 +94,9 @@ impl<'a> GA<'a> {
                     if self.config.elitism {
                         self.population.individuals[worst_individual_index] =
                             self.best_individual().unwrap().clone();
+
                         new_result[worst_individual_index] = self.best_individual_value.unwrap();
+                        self.best_individual_index = Some(worst_individual_index);
                     }
                 }
             }
@@ -106,7 +132,7 @@ impl<'a> GA<'a> {
                     .clone();
             });
         let result = self.evaluate();
-        let new_result = self.update_best(result);
+        let new_result = self.update_best(&result);
         return new_result;
     }
     fn selection(&self, result: Vec<f64>) -> Vec<(usize, usize)> {
@@ -148,7 +174,7 @@ impl<'a> GA<'a> {
         return mating_pool;
     }
 
-    fn crossover(&self, mating_pool: Vec<(usize, usize)>) -> Population {
+    fn crossover(&self, mating_pool: &Vec<(usize, usize)>) -> Population {
         // let mut new_population = Vec::with_capacity(self.config.pop_config.pop_size);
         let crossover_chance = self.config.crossover_chance;
         let couples_mapped = mating_pool.par_iter().map(|(parent1, parent2)| {
@@ -176,7 +202,7 @@ impl<'a> GA<'a> {
         return new_population;
     }
 
-    fn mutation(&self, new_population: Population) -> Population {
+    fn mutation(&self, new_population: &Population) -> Population {
         let mutation_chance = self.config.mutation_chance;
         let mutated_population = new_population.individuals.par_iter().map(|individual| {
             let new_individual = individual.chromosome.iter().map(|gene| {
@@ -198,23 +224,27 @@ impl<'a> GA<'a> {
     }
 
     fn log_run_result(&self) {
+        // TODO(Otavio): Best Individual Value and Best Individual Value Decoded are not the same
         match self.best_individual() {
             Some(best_individual) => {
-                tracing::info!("Best Individual: {:?}", best_individual.chromosome);
-                tracing::info!(
+                info!(
+                    "Best Individual: {}",
+                    IndividualTypeVecDisplay(best_individual.chromosome.clone())
+                );
+                info!(
                     "Best Individual Value: {}",
                     self.best_individual_value.unwrap()
                 );
-                tracing::info!(
+                info!(
                     "Best Individual Value Decoded: {}",
                     self.problem
                         .objective(&self.problem.decode(best_individual))
                 );
-                tracing::info!(
+                info!(
                     "Best Individual Decoded: {:?}",
                     self.problem.decode(best_individual)
                 );
-                tracing::info!(
+                info!(
                     "Best Individual Constraint: {}",
                     self.problem
                         .constraint(&self.problem.decode(best_individual))
@@ -224,12 +254,12 @@ impl<'a> GA<'a> {
         };
     }
     fn log_generation(&self, generation: usize, result: &Vec<f64>) {
-        tracing::info!(
+        info!(
             "State Individual: {} {} {} {} {}",
             generation,
             self.best_individual_value.unwrap(),
             result.iter().max_by(|a, b| a.total_cmp(b)).unwrap_or(&0.0),
-            result.iter().sum::<f64>()/ result.len() as f64,
+            result.iter().sum::<f64>() / result.len() as f64,
             result.iter().min_by(|a, b| a.total_cmp(b)).unwrap_or(&0.0),
         );
     }
@@ -246,18 +276,21 @@ impl<'a> GA<'a> {
 
         for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
-            let mut new_result = self.update_best(result);
-            if self.generations_without_improvement >= self.config.generations_to_genocide {
-                new_result = self.genocide();
-            }
-            self.log_generation(generation, &new_result);
-            let mating_pool = self.selection(new_result);
-            let mut new_population = self.crossover(mating_pool);
-            new_population = self.mutation(new_population);
+            let new_result = self.update_best(&result);
+            let newer_result =
+                if self.generations_without_improvement >= self.config.generations_to_genocide {
+                    self.genocide()
+                } else {
+                    new_result
+                };
+            self.log_generation(generation, &newer_result);
+            let mating_pool = self.selection(newer_result);
+            let mut new_population = self.crossover(&mating_pool);
+            new_population = self.mutation(&new_population);
             self.population = new_population;
-            self.log_run_result();
             pb.inc(1)
         }
+        self.log_run_result();
         pb.finish_with_message("Run completed");
         return (self.best_individual(), self.best_individual_value);
     }

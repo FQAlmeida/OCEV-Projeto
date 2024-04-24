@@ -84,8 +84,8 @@ impl Config {
             elitism: true,
             selection_method: SelectionMethod::TOURNAMENT,
             crossover_method: CrossOverMethod::OnePoint,
-            crossover_chance: 0.85,
-            mutation_chance: 0.025,
+            crossover_chance: 0.9,
+            mutation_chance: 0.01,
             constraint_penalty: -1.0,
             kp: 0.9,
         });
