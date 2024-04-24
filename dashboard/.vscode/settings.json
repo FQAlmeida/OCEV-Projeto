@@ -1,0 +1,11 @@
+{
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "cSpell.words": [
+        "dataframe",
+        "plotly",
+        "selectbox",
+        "streamlit"
+    ],
+    "cSpell.language": "en,pt"
+}

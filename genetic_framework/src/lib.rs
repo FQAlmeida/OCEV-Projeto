@@ -2,6 +2,7 @@ use genetic_algorithm::GA;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::Individual;
 use loader_config::Config;
+use log::info;
 use problem::Problem;
 
 pub struct Framework {
@@ -23,20 +24,26 @@ impl Framework {
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         )
         .unwrap();
-    
+
         let pb = m.add(ProgressBar::new(self.config.qtd_runs.try_into().unwrap()));
 
         pb.set_style(sty);
         pb.set_message("Runs");
-        
-        for _ in 1..=self.config.qtd_runs {
+
+        info!("Problem: {}", self.problem.get_name());
+        info!("Config: {}", serde_json::to_string(&self.config).unwrap());
+        for run in 1..=self.config.qtd_runs {
+            info!("Run: {}", run);
             let mut ga = GA::new(&self.problem, &self.config, &m);
             let (new_individual, new_result) = &ga.run();
             if result.is_none() || new_result.unwrap() > result.unwrap() {
-                (best_individual, result) =
-                    (Some(new_individual.unwrap().clone()), new_result.clone());
+                (best_individual, result) = (
+                    Some(new_individual.as_ref().unwrap().clone()),
+                    new_result.clone(),
+                );
             }
-            pb.inc(1)
+            pb.inc(1);
+            info!("End Run: {}", run);
         }
         pb.finish_with_message("All runs completed");
         return (best_individual, result);

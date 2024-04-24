@@ -35,6 +35,7 @@ impl Problem for SAT3 {
                 IndividualType::Binary(value) => {
                     return *value as u32 as f64;
                 }
+                IndividualType::Permuted(_) => todo!(),
             })
             .collect();
     }
@@ -55,8 +56,11 @@ impl Problem for SAT3 {
         let config = self.get_config();
         let decoded_individual = self.decode(individual);
         let obj = self.normed_objective(&decoded_individual);
+        debug_assert!(obj == self.objective(&decoded_individual));
         let constraint = self.constraint(&decoded_individual);
-        return obj + config.constraint_penalty * constraint;
+        let fitness_result = obj + config.constraint_penalty * constraint;
+        debug_assert!(fitness_result == self.objective(&decoded_individual));
+        return fitness_result;
     }
 
     fn objective(&self, individual: &Vec<f64>) -> f64 {
@@ -73,6 +77,10 @@ impl Problem for SAT3 {
             .sum::<f64>()
             .into();
         return clauses_satisfied;
+    }
+
+    fn get_name(&self) -> String {
+        String::from("SAT-3")
     }
 }
 

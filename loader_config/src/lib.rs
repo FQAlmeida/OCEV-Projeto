@@ -1,29 +1,34 @@
-use anyhow::Result;
+use std::path::Path;
+use std::{fmt::Debug, fs};
 
-#[derive(Debug, Copy, Clone)]
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum PopType {
     BINARY,
     REAL,
     INTEGER,
     PERMUTED,
 }
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum SelectionMethod {
-    ROULETTE,
-    TOURNAMENT,
+    Roulette,
+    Tournament,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum CrossOverMethod {
     OnePoint,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct BoundConfig {
     pub upper: f64,
     pub lower: f64,
 }
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct PopConfig {
     pub dim: usize,
     pub pop_size: usize,
@@ -31,7 +36,7 @@ pub struct PopConfig {
     pub bounds: Option<BoundConfig>,
 }
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, Serialize, Deserialize)]
 pub struct Config {
     pub pop_config: PopConfig,
     pub qtd_gen: usize,
@@ -47,47 +52,13 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Config {
-        Config {
-            pop_config: PopConfig {
-                dim: 100,
-                pop_size: 30,
-                pop_type: PopType::BINARY,
-                bounds: None,
-            },
-            qtd_gen: 10000,
-            qtd_runs: 5,
-            constraint_penalty: 1.0,
-            crossover_chance: 0.9,
-            crossover_method: CrossOverMethod::OnePoint,
-            elitism: true,
-            generations_to_genocide: 200,
-            kp: 0.9,
-            mutation_chance: 0.03,
-            selection_method: SelectionMethod::ROULETTE,
-        }
-    }
-}
-
-impl Config {
-    pub fn load(_: &str) -> Result<Config> {
-        return Ok(Config {
-            pop_config: PopConfig {
-                dim: 100,
-                pop_size: 50,
-                pop_type: PopType::BINARY,
-                bounds: None,
-            },
-            qtd_gen: 5000,
-            qtd_runs: 10,
-            generations_to_genocide: 150,
-            elitism: true,
-            selection_method: SelectionMethod::TOURNAMENT,
-            crossover_method: CrossOverMethod::OnePoint,
-            crossover_chance: 0.9,
-            mutation_chance: 0.01,
-            constraint_penalty: -1.0,
-            kp: 0.9,
-        });
+    pub fn new<P>(path: P) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
+        let data = fs::read_to_string(path).expect("Failed to read file");
+        let config_data: Value = serde_json::from_str(&data)?;
+        let obj: Config = serde_json::from_value(config_data["config"].clone())?;
+        Ok(obj)
     }
 }

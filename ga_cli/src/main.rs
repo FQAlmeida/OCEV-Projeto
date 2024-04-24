@@ -55,7 +55,7 @@ fn config_tracing(problem_name: &str) -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let options: Vec<&str> = vec!["SAT-3"];
+    let options: Vec<&str> = vec!["SAT-3", "RADIO", "ALGEBRAIC-FUNCTION"];
     let problem_name_answer: Result<&str, InquireError> =
         Select::new("Which problem to run?", options).prompt();
     let problem_name = match problem_name_answer {
@@ -88,11 +88,12 @@ async fn main() -> Result<()> {
         .unwrap()
         .map(|entry| entry.unwrap())
         .filter(|entry| {
-            entry
-                .file_name()
-                .into_string()
-                .unwrap()
-                .starts_with(problem_name.to_lowercase().as_str())
+            entry.path().extension().unwrap() == "json"
+                && entry
+                    .file_name()
+                    .into_string()
+                    .unwrap()
+                    .starts_with(problem_name.to_lowercase().as_str())
         })
         .map(|entry| {
             fs::canonicalize(entry.path())

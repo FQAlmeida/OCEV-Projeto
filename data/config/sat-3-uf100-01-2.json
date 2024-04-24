@@ -1,0 +1,19 @@
+{
+  "config": {
+    "pop_config": {
+      "dim": 100,
+      "pop_size": 50,
+      "pop_type": "BINARY"
+    },
+    "qtd_gen": 2500,
+    "qtd_runs": 3,
+    "selection_method": "Tournament",
+    "crossover_method": "OnePoint",
+    "crossover_chance": 0.8,
+    "mutation_chance": 0.02,
+    "constraint_penalty": -1.0,
+    "elitism": true,
+    "generations_to_genocide": 150,
+    "kp": 0.8
+  }
+}

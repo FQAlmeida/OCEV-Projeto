@@ -1,0 +1,19 @@
+{
+  "config": {
+    "pop_config": {
+      "dim": 100,
+      "pop_size": 30,
+      "pop_type": "BINARY"
+    },
+    "qtd_gen": 1,
+    "qtd_runs": 1,
+    "selection_method": "roulette",
+    "crossover_method": "OnePoint",
+    "crossover_chance": 1.0,
+    "mutation_chance": 0.05,
+    "constraint_penalty": -1.0,
+    "elitism": false,
+    "generations_to_genocide": 25,
+    "kp": 1.0
+  }
+}

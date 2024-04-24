@@ -1,0 +1,75 @@
+[tool.poetry]
+name = "dashboard"
+version = "0.1.0"
+description = ""
+authors = ["Otávio Almeida <otavioalmeida650@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+plotly = "^5.21.0"
+polars = "^0.20.22"
+streamlit = "^1.33.0"
+
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.12.2"
+ruff = "^0.4.1"
+pytest = "^8.1.1"
+pytest-cov = "^5.0.0"
+pyspy = "^0.1.1"
+pytest-mock = "^3.14.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 85
+preview = true
+fix = true
+unsafe-fixes = true
+output-format = "full"
+include = ["**/*.py", "**/*.pyi", "**/pyproject.toml", "*.ipynb"]
+lint.select = [
+  "E",      # pycodestyle
+  "F",      # pyflakes
+  "UP",     # pyupgrade
+  "N",      # pep8-naming
+  "C90",    # mccabe
+  "I",      # isort
+  "PERF",   # perflint
+  "NPY",    # numpy
+  "PD",     # pandas
+  "PL",     # pylint
+  "RUF",    # ruff
+  "ERA",    # eradicate
+  "LOG",    # log
+  "FURB",   # refurb
+  "FLY",    # fly
+  "TRY",    # tryceratops
+  "TD",     # todo
+]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "-s --cov=ocev_projeto --cov-report html:tests/htmlcov"
+
+[tool.coverage.report]
+exclude_lines = [
+  "def main",
+  "pragma: no cover",
+  "def __repr__",
+  "def __str__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "if typing.TYPE_CHECKING:"
+]
+
+[tool.taskipy.tasks]
+test = "pytest tests/"
+lint = "ruff check ."
+dash = "streamlit run dashboard/page.py"

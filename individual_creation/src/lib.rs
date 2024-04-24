@@ -5,12 +5,14 @@ use rand::Rng;
 #[derive(Clone, Copy, Debug)]
 pub enum IndividualType {
     Binary(bool),
+    Permuted(usize),
 }
 
 impl Display for IndividualType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             IndividualType::Binary(value) => write!(f, "{}", *value),
+            IndividualType::Permuted(value) => write!(f, "{}", *value),
         }
     }
 }
@@ -19,6 +21,7 @@ impl Into<bool> for IndividualType {
     fn into(self) -> bool {
         match self {
             IndividualType::Binary(value) => value,
+            IndividualType::Permuted(value) => value != 0,
         }
     }
 }
@@ -27,6 +30,7 @@ impl IndividualType {
     pub fn mutate(self) -> IndividualType {
         match self {
             IndividualType::Binary(value) => IndividualType::Binary(!value),
+            IndividualType::Permuted(_) => todo!(),
         }
     }
 }
@@ -42,6 +46,7 @@ impl Individual {
         for _ in 0..dim {
             let value = match individual_type {
                 IndividualType::Binary(_) => rng.gen::<bool>(),
+                IndividualType::Permuted(_) => todo!(),
             };
             chromosome.push(IndividualType::Binary(value));
         }

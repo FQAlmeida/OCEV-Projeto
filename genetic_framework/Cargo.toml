@@ -11,3 +11,6 @@ problem = {path = "../problem"}
 loader_config = {path = "../loader_config"}
 individual_creation = {path = "../individual_creation"}
 indicatif = {version = "0.17.8"}
+log = {version = "0.4.21"}
+serde = {version = "1.0.198"}
+serde_json = {version = "1.0.116"}

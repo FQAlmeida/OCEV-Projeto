@@ -5,7 +5,9 @@
         "chrono",
         "indicatif",
         "ocev",
+        "powf",
         "projeto",
-        "rngs"
+        "rngs",
+        "serde"
     ]
 }
