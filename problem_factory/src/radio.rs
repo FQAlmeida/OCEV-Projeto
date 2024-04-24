@@ -23,7 +23,7 @@ pub struct Radio {
 
 impl Radio {
     pub fn new(problem: RadioProblem, config: Config) -> Self {
-        return Radio { problem, config };
+        Radio { problem, config }
     }
 }
 
@@ -47,15 +47,15 @@ impl Problem for Radio {
             .clone()
             .iter()
             .fold(0.0, |a, &b| 2.0 * a + b);
-        return vec![qtd_line_a, qtd_line_b];
+        vec![qtd_line_a, qtd_line_b]
     }
 
     fn get_config(&self) -> &Config {
-        return &self.config;
+        &self.config
     }
 
     fn normed_objective(&self, individual: &Vec<f64>) -> f64 {
-        return self.objective(individual) / self.problem.max_fo;
+        self.objective(individual) / self.problem.max_fo
     }
 
     fn constraint(&self, individual: &Vec<f64>) -> f64 {
@@ -67,7 +67,7 @@ impl Problem for Radio {
         let penalty_2 = f64::max(0.0, (qtd_1 - 24.0) / 8.0);
         let penalty_3 = f64::max(0.0, (qtd_2 - 16.0) / 16.0);
         let p = (penalty + penalty_2 + penalty_3) / 3.0;
-        return f64::max(0.0, p);
+        f64::max(0.0, p)
     }
 
     fn fitness(&self, individual: &Individual) -> f64 {
@@ -78,15 +78,15 @@ impl Problem for Radio {
         let constraint = self.constraint(&decoded_individual);
         let fitness_result = obj + config.constraint_penalty * constraint;
         debug_assert!(fitness_result == self.objective(&decoded_individual));
-        return fitness_result;
+        fitness_result
     }
 
     fn objective(&self, individual: &Vec<f64>) -> f64 {
         let qtd_1 = individual[0];
         let qtd_2 = individual[1];
 
-        let profit = self.problem.profit_a * qtd_1 + self.problem.profit_b * qtd_2;
-        return profit;
+        
+        self.problem.profit_a * qtd_1 + self.problem.profit_b * qtd_2
     }
 
     fn get_name(&self) -> String {

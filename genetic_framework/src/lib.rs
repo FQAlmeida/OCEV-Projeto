@@ -39,13 +39,13 @@ impl Framework {
             if result.is_none() || new_result.unwrap() > result.unwrap() {
                 (best_individual, result) = (
                     Some(new_individual.as_ref().unwrap().clone()),
-                    new_result.clone(),
+                    *new_result,
                 );
             }
             pb.inc(1);
             info!("End Run: {}", run);
         }
         pb.finish_with_message("All runs completed");
-        return (best_individual, result);
+        (best_individual, result)
     }
 }

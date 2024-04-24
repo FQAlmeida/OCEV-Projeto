@@ -18,11 +18,11 @@ pub struct SAT3 {
 impl SAT3 {
     pub fn new(problem: Vec<(i32, i32, i32)>, config: Config) -> SAT3 {
         let (clause_id, clause_neg) = SAT3::clauses(&problem);
-        return SAT3 {
+        SAT3 {
             config,
             clause_id,
             clause_neg,
-        };
+        }
     }
 }
 
@@ -33,7 +33,7 @@ impl Problem for SAT3 {
             .iter()
             .map(|i| match i {
                 IndividualType::Binary(value) => {
-                    return *value as u32 as f64;
+                    *value as u32 as f64
                 }
                 IndividualType::Permuted(_) => todo!(),
             })
@@ -41,15 +41,15 @@ impl Problem for SAT3 {
     }
 
     fn get_config(&self) -> &Config {
-        return &self.config;
+        &self.config
     }
 
     fn normed_objective(&self, individual: &Vec<f64>) -> f64 {
-        return self.objective(individual);
+        self.objective(individual)
     }
 
     fn constraint(&self, _: &Vec<f64>) -> f64 {
-        return 0.0;
+        0.0
     }
 
     fn fitness(&self, individual: &Individual) -> f64 {
@@ -60,7 +60,7 @@ impl Problem for SAT3 {
         let constraint = self.constraint(&decoded_individual);
         let fitness_result = obj + config.constraint_penalty * constraint;
         debug_assert!(fitness_result == self.objective(&decoded_individual));
-        return fitness_result;
+        fitness_result
     }
 
     fn objective(&self, individual: &Vec<f64>) -> f64 {
@@ -72,11 +72,10 @@ impl Problem for SAT3 {
                 let (clause, clause_neg) = i;
                 let solution = individual;
                 let evaluated_solution = self.eval_solution(solution, clause, clause_neg);
-                return evaluated_solution as u32 as f64;
+                evaluated_solution as u32 as f64
             })
-            .sum::<f64>()
-            .into();
-        return clauses_satisfied;
+            .sum::<f64>();
+        clauses_satisfied
     }
 
     fn get_name(&self) -> String {
@@ -94,7 +93,7 @@ impl SAT3 {
             .iter()
             .map(|(a, b, c)| (*a < 0, *b < 0, *c < 0))
             .collect();
-        return (clause_id, clause_neg);
+        (clause_id, clause_neg)
     }
 
     fn eval_solution(
@@ -112,7 +111,7 @@ impl SAT3 {
         let checked_solution_a = (!solution_a && *na) || (solution_a && !*na);
         let checked_solution_b = (!solution_b && *nb) || (solution_b && !*nb);
         let checked_solution_c = (!solution_c && *nc) || (solution_c && !*nc);
-        return checked_solution_a || checked_solution_b || checked_solution_c;
+        checked_solution_a || checked_solution_b || checked_solution_c
     }
 }
 
@@ -135,7 +134,7 @@ where
             let a: i32 = clause.next().unwrap().parse().unwrap();
             let b: i32 = clause.next().unwrap().parse().unwrap();
             let c: i32 = clause.next().unwrap().parse().unwrap();
-            return (a, b, c);
+            (a, b, c)
         })
         .collect::<Vec<(i32, i32, i32)>>();
     Ok(problem)

@@ -39,7 +39,7 @@ impl Display for IndividualTypeVecDisplay {
             }
         }
 
-        comma_separated.push_str(&self.0[self.0.len() - 1].to_string().as_str());
+        comma_separated.push_str(self.0[self.0.len() - 1].to_string().as_str());
         write!(f, "{}]", comma_separated)
     }
 }
@@ -72,7 +72,7 @@ impl<'a> GA<'a> {
             .enumerate()
             .map(|(i, individual)| (i, self.problem.fitness(individual)))
             .collect();
-        return fitness;
+        fitness
     }
 
     fn update_best(&mut self, result: &Vec<(usize, f64)>) -> Vec<(usize, f64)> {
@@ -105,7 +105,7 @@ impl<'a> GA<'a> {
                                         self.best_individual_value.unwrap(),
                                     );
                                 }
-                                return *tuple;
+                                *tuple
                             })
                             .collect();
                     }
@@ -117,7 +117,7 @@ impl<'a> GA<'a> {
                     Some(self.population.individuals[*best_individual_index].clone());
             }
         }
-        return new_result;
+        new_result
     }
 
     fn genocide(&mut self) -> Vec<(usize, f64)> {
@@ -137,8 +137,8 @@ impl<'a> GA<'a> {
                     .clone();
             });
         let result = self.evaluate();
-        let new_result = self.update_best(&result);
-        return new_result;
+        
+        self.update_best(&result)
     }
     fn selection(&self, result: Vec<(usize, f64)>) -> Vec<(usize, usize)> {
         let pop_size = self.config.pop_config.pop_size;
@@ -176,7 +176,7 @@ impl<'a> GA<'a> {
             };
             mating_pool.push((parent1, parent2));
         }
-        return mating_pool;
+        mating_pool
     }
 
     fn crossover(&self, mating_pool: &Vec<(usize, usize)>) -> Population {
@@ -197,14 +197,14 @@ impl<'a> GA<'a> {
             }
             let child1 = self.population.individuals[*parent1].clone();
             let child2 = self.population.individuals[*parent2].clone();
-            return (child1, child2);
+            (child1, child2)
         });
         let new_population: Population = Population {
             individuals: couples_mapped
                 .flat_map(|tuple| once(tuple.0).chain(once(tuple.1)))
                 .collect(),
         };
-        return new_population;
+        new_population
     }
 
     fn mutation(&self, new_population: &Population) -> Population {
@@ -216,16 +216,16 @@ impl<'a> GA<'a> {
                 if mutation <= mutation_chance {
                     return gene.mutate();
                 }
-                return *gene;
+                *gene
             });
-            return Individual {
+            Individual {
                 chromosome: new_individual.collect(),
-            };
+            }
         });
-        let population = Population {
+        
+        Population {
             individuals: mutated_population.collect(),
-        };
-        return population;
+        }
     }
 
     fn log_run_result(&self) {
@@ -352,6 +352,6 @@ impl<'a> GA<'a> {
         }
         self.log_run_result();
         pb.finish_with_message("Run completed");
-        return (self.best_individual.clone(), self.best_individual_value);
+        (self.best_individual.clone(), self.best_individual_value)
     }
 }

@@ -22,15 +22,15 @@ where
     match problem.to_uppercase().as_str() {
         "SAT-3" => {
             let problem = sat_3::load_instance(instance).unwrap();
-            return (Box::new(SAT3::new(problem, config)), config);
+            (Box::new(SAT3::new(problem, config)), config)
         }
         "RADIO" => {
             let problem = radio::load_instance(instance).unwrap();
-            return (Box::new(Radio::new(problem, config)), config);
+            (Box::new(Radio::new(problem, config)), config)
         }
         "ALGEBRAIC-FUNCTION" => {
             let problem = algebraic_function::load_instance(instance).unwrap();
-            return (Box::new(AlgebraicFunction::new(problem, config)), config);
+            (Box::new(AlgebraicFunction::new(problem, config)), config)
         }
         _ => panic!("Problem not found"),
     }

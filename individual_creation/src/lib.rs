@@ -17,9 +17,9 @@ impl Display for IndividualType {
     }
 }
 
-impl Into<bool> for IndividualType {
-    fn into(self) -> bool {
-        match self {
+impl From<IndividualType> for bool {
+    fn from(val: IndividualType) -> Self {
+        match val {
             IndividualType::Binary(value) => value,
             IndividualType::Permuted(value) => value != 0,
         }
