@@ -27,7 +27,8 @@ impl From<IndividualType> for bool {
 }
 
 impl IndividualType {
-    pub fn mutate(self) -> IndividualType {
+    #[must_use]
+    pub fn mutate(self) -> Self {
         match self {
             IndividualType::Binary(value) => IndividualType::Binary(!value),
             IndividualType::Permuted(_) => todo!(),
@@ -40,7 +41,8 @@ pub struct Individual {
 }
 
 impl Individual {
-    pub fn new(dim: usize, individual_type: &IndividualType) -> Individual {
+    #[must_use]
+    pub fn new(dim: usize, individual_type: &IndividualType) -> Self {
         let mut rng = rand::thread_rng();
         let mut chromosome = Vec::with_capacity(dim);
         for _ in 0..dim {
@@ -61,7 +63,8 @@ pub struct Population {
 }
 
 impl Population {
-    pub fn new(qtd_individuals: usize, dim: usize, individual_type: &IndividualType) -> Population {
+    #[must_use]
+    pub fn new(qtd_individuals: usize, dim: usize, individual_type: &IndividualType) -> Self {
         let individuals: Vec<Individual> = (0..qtd_individuals)
             .map(|_| Individual::new(dim, individual_type))
             .collect();
