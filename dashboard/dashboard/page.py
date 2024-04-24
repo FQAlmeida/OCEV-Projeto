@@ -61,6 +61,9 @@ if not st.session_state.get("title"):
     st.rerun()
 st.title(f"Resultados do {problem_data.name.upper()}")
 
+st.markdown("### Configuração")
+st.json(problem_data.config, expanded=False)
+
 st.plotly_chart(
     px.box(
         y=results,
@@ -93,4 +96,3 @@ for i, d in enumerate(convergency):
         use_container_width=True,
     )
 
-st.write(problem_data.config)
