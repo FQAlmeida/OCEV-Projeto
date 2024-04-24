@@ -1,0 +1,12 @@
+blank_lines_lower_bound = 0
+format_strings = true
+indent_style = "Block"
+use_try_shorthand = true
+use_small_heuristics = "Default"
+use_field_init_shorthand = true
+group_imports = "StdExternalCrate"
+reorder_impl_items = true
+normalize_doc_attributes = true
+normalize_comments = true
+imports_granularity = "Crate"
+max_width = 80

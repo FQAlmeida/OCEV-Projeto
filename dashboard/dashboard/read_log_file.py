@@ -1,6 +1,6 @@
+import json
 from dataclasses import dataclass
 from enum import StrEnum
-import json
 from pathlib import Path
 
 
@@ -112,7 +112,6 @@ def _process_problem(line: str) -> ProblemData:
 
 def _process_config(line: str, problem: ProblemData):
     content = line.removeprefix(LogTypes.CONFIG).strip()
-    print(content)
     config = json.loads(content)
     problem.config = config
 
