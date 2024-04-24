@@ -8,7 +8,9 @@ use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
-use rayon::iter::{once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{
+    once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
+};
 
 pub struct GA<'a> {
     pub config: &'a Config,
@@ -65,6 +67,7 @@ impl<'a> GA<'a> {
             generations_without_improvement: 0,
         }
     }
+
     fn evaluate(&self) -> Vec<(usize, f64)> {
         let population = &self.population.individuals;
         let fitness = population
@@ -88,8 +91,9 @@ impl<'a> GA<'a> {
         if let Some(current_best) = self.best_individual_value {
             if *best_individual_value >= current_best {
                 self.best_individual_value = Some(*best_individual_value);
-                self.best_individual =
-                    Some(self.population.individuals[*best_individual_index].clone());
+                self.best_individual = Some(
+                    self.population.individuals[*best_individual_index].clone(),
+                );
             } else {
                 self.generations_without_improvement += 1;
                 if self.config.elitism {
@@ -111,8 +115,9 @@ impl<'a> GA<'a> {
             }
         } else {
             self.best_individual_value = Some(*best_individual_value);
-            self.best_individual =
-                Some(self.population.individuals[*best_individual_index].clone());
+            self.best_individual = Some(
+                self.population.individuals[*best_individual_index].clone(),
+            );
         }
         new_result
     }
@@ -127,7 +132,10 @@ impl<'a> GA<'a> {
         let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
         let mut sequence: RandomSequence<u16> = config.into_iter();
         (0..self.config.pop_config.pop_size / 2)
-            .map(|_| (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size)
+            .map(|_| {
+                (sequence.next().unwrap() as usize)
+                    % self.config.pop_config.pop_size
+            })
             .for_each(|index| {
                 self.population.individuals[index] = new_population.individuals
                     [index % (self.config.pop_config.pop_size / 2)]
@@ -137,11 +145,13 @@ impl<'a> GA<'a> {
 
         self.update_best(&result)
     }
+
     fn selection(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)> {
         let pop_size = self.config.pop_config.pop_size;
         let kp = self.config.kp;
         let mut rng = rand::thread_rng();
-        let mut mating_pool: Vec<(usize, usize)> = Vec::with_capacity(pop_size / 2);
+        let mut mating_pool: Vec<(usize, usize)> =
+            Vec::with_capacity(pop_size / 2);
         for _ in 0..(pop_size / 2) {
             let parent1 = {
                 let p1 = rng.gen_range(0..pop_size);
@@ -179,23 +189,29 @@ impl<'a> GA<'a> {
     fn crossover(&self, mating_pool: &Vec<(usize, usize)>) -> Population {
         // let mut new_population = Vec::with_capacity(self.config.pop_config.pop_size);
         let crossover_chance = self.config.crossover_chance;
-        let couples_mapped = mating_pool.par_iter().map(|(parent1, parent2)| {
-            let mut rng = rand::thread_rng();
-            let crossover = rng.gen::<f64>();
-            if crossover <= crossover_chance {
-                let crossover_point = rng.gen_range(0..self.config.pop_config.dim);
-                let mut child1 = self.population.individuals[*parent1].clone();
-                let mut child2 = self.population.individuals[*parent2].clone();
-                for i in 0..crossover_point {
-                    child1.chromosome[i] = self.population.individuals[*parent2].chromosome[i];
-                    child2.chromosome[i] = self.population.individuals[*parent1].chromosome[i];
+        let couples_mapped =
+            mating_pool.par_iter().map(|(parent1, parent2)| {
+                let mut rng = rand::thread_rng();
+                let crossover = rng.gen::<f64>();
+                if crossover <= crossover_chance {
+                    let crossover_point =
+                        rng.gen_range(0..self.config.pop_config.dim);
+                    let mut child1 =
+                        self.population.individuals[*parent1].clone();
+                    let mut child2 =
+                        self.population.individuals[*parent2].clone();
+                    for i in 0..crossover_point {
+                        child1.chromosome[i] =
+                            self.population.individuals[*parent2].chromosome[i];
+                        child2.chromosome[i] =
+                            self.population.individuals[*parent1].chromosome[i];
+                    }
+                    return (child1, child2);
                 }
-                return (child1, child2);
-            }
-            let child1 = self.population.individuals[*parent1].clone();
-            let child2 = self.population.individuals[*parent2].clone();
-            (child1, child2)
-        });
+                let child1 = self.population.individuals[*parent1].clone();
+                let child2 = self.population.individuals[*parent2].clone();
+                (child1, child2)
+            });
         let new_population: Population = Population {
             individuals: couples_mapped
                 .flat_map(|tuple| once(tuple.0).chain(once(tuple.1)))
@@ -206,19 +222,20 @@ impl<'a> GA<'a> {
 
     fn mutation(&self, new_population: &Population) -> Population {
         let mutation_chance = self.config.mutation_chance;
-        let mutated_population = new_population.individuals.par_iter().map(|individual| {
-            let new_individual = individual.chromosome.iter().map(|gene| {
-                let mut rng = rand::thread_rng();
-                let mutation = rng.gen::<f64>();
-                if mutation <= mutation_chance {
-                    return gene.mutate();
+        let mutated_population =
+            new_population.individuals.par_iter().map(|individual| {
+                let new_individual = individual.chromosome.iter().map(|gene| {
+                    let mut rng = rand::thread_rng();
+                    let mutation = rng.gen::<f64>();
+                    if mutation <= mutation_chance {
+                        return gene.mutate();
+                    }
+                    *gene
+                });
+                Individual {
+                    chromosome: new_individual.collect(),
                 }
-                *gene
             });
-            Individual {
-                chromosome: new_individual.collect(),
-            }
-        });
 
         Population {
             individuals: mutated_population.collect(),
@@ -231,7 +248,9 @@ impl<'a> GA<'a> {
             Some(best_individual) => {
                 info!(
                     "Best Individual: {}",
-                    IndividualTypeVecDisplay(best_individual.chromosome.clone())
+                    IndividualTypeVecDisplay(
+                        best_individual.chromosome.clone()
+                    )
                 );
                 info!(
                     "Best Individual Value: {}",
@@ -255,6 +274,7 @@ impl<'a> GA<'a> {
             None => {}
         };
     }
+
     fn log_generation(&self, generation: usize, result: &[(usize, f64)]) {
         let result_mapped = result.iter().map(|(_, value)| value);
         info!(
@@ -288,12 +308,13 @@ impl<'a> GA<'a> {
         for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
             let new_result = self.update_best(&result);
-            let newer_result =
-                if self.generations_without_improvement >= self.config.generations_to_genocide {
-                    self.genocide()
-                } else {
-                    new_result
-                };
+            let newer_result = if self.generations_without_improvement
+                >= self.config.generations_to_genocide
+            {
+                self.genocide()
+            } else {
+                new_result
+            };
 
             self.log_generation(generation, &newer_result);
 

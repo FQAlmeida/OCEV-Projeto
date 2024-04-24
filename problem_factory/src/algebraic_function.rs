@@ -38,7 +38,9 @@ impl Problem for AlgebraicFunction {
             .fold(0.0, |a, b| 2.0 * a + b);
         let value = self.problem.min_x
             + ((self.problem.max_x - self.problem.min_x)
-                * (decimal / (2.0_f64.powf(individual.chromosome.len() as f64) - 1.0)));
+                * (decimal
+                    / (2.0_f64.powf(individual.chromosome.len() as f64)
+                        - 1.0)));
         vec![value]
     }
 

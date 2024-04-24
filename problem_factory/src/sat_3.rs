@@ -66,7 +66,8 @@ impl Problem for SAT3 {
             .map(|i| {
                 let (clause, clause_neg) = i;
                 let solution = individual;
-                let evaluated_solution = SAT3::eval_solution(solution, clause, *clause_neg);
+                let evaluated_solution =
+                    SAT3::eval_solution(solution, clause, *clause_neg);
                 f64::from(u32::from(evaluated_solution))
             })
             .sum::<f64>();
@@ -105,9 +106,12 @@ impl SAT3 {
         let (a, b, c) = clause_id;
         let (na, nb, nc) = clause_neg;
 
-        let solution_a: bool = (solution[*a as usize] - 1.0_f64).abs() < f64::EPSILON;
-        let solution_b: bool = (solution[*b as usize] - 1.0_f64).abs() < f64::EPSILON;
-        let solution_c: bool = (solution[*c as usize] - 1.0_f64).abs() < f64::EPSILON;
+        let solution_a: bool =
+            (solution[*a as usize] - 1.0_f64).abs() < f64::EPSILON;
+        let solution_b: bool =
+            (solution[*b as usize] - 1.0_f64).abs() < f64::EPSILON;
+        let solution_c: bool =
+            (solution[*c as usize] - 1.0_f64).abs() < f64::EPSILON;
         let checked_solution_a = (!solution_a && na) || (solution_a && !na);
         let checked_solution_b = (!solution_b && nb) || (solution_b && !nb);
         let checked_solution_c = (!solution_c && nc) || (solution_c && !nc);

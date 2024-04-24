@@ -1,3 +1,5 @@
+use std::fs::{self};
+
 use anyhow::Result;
 use genetic_framework::Framework;
 use inquire::{list_option::ListOption, InquireError, Select};
@@ -8,7 +10,6 @@ use log4rs::{
     encode::pattern::PatternEncoder,
     Config,
 };
-use std::fs::{self};
 
 fn format_path(path: ListOption<&String>) -> String {
     fs::canonicalize(path.value)
@@ -58,7 +59,7 @@ async fn main() -> Result<()> {
     let options: Vec<&str> = vec!["SAT-3", "RADIO", "ALGEBRAIC-FUNCTION"];
     let problem_name_answer: Result<&str, InquireError> =
         Select::new("Which problem to run?", options).prompt();
-    let problem_name =  problem_name_answer.expect("Problem not found");
+    let problem_name = problem_name_answer.expect("Problem not found");
     config_tracing(problem_name)?;
 
     let instances_options: Vec<String> =
@@ -103,7 +104,8 @@ async fn main() -> Result<()> {
             .prompt();
     let config_path = config_answer.expect("Config not found");
 
-    let (problem, config) = problem_factory::problem_factory(problem_name, &instance, &config_path);
+    let (problem, config) =
+        problem_factory::problem_factory(problem_name, &instance, &config_path);
     let ga_framework = Framework::new(problem, config);
     println!("{:?}", ga_framework.run());
 

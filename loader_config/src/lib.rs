@@ -1,5 +1,4 @@
-use std::path::Path;
-use std::{fmt::Debug, fs};
+use std::{fmt::Debug, fs, path::Path};
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -67,7 +66,8 @@ impl Config {
     {
         let data = fs::read_to_string(path).expect("Failed to read file");
         let config_data: Value = serde_json::from_str(&data)?;
-        let obj: Config = serde_json::from_value(config_data["config"].clone())?;
+        let obj: Config =
+            serde_json::from_value(config_data["config"].clone())?;
         Ok(obj)
     }
 }
