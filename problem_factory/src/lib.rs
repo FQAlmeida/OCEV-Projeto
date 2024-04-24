@@ -10,6 +10,9 @@ mod radio;
 use algebraic_function::AlgebraicFunction;
 use radio::Radio;
 
+/// # Panics
+/// Panics if the configuration file is not found
+/// or the problem is not implemented
 pub fn problem_factory<P>(
     problem: &str,
     instance: &str,
@@ -22,7 +25,7 @@ where
     match problem.to_uppercase().as_str() {
         "SAT-3" => {
             let problem = sat_3::load_instance(instance).unwrap();
-            (Box::new(SAT3::new(problem, config)), config)
+            (Box::new(SAT3::new(&problem, config)), config)
         }
         "RADIO" => {
             let problem = radio::load_instance(instance).unwrap();

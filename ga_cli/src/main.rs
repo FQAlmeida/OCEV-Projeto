@@ -58,10 +58,7 @@ async fn main() -> Result<()> {
     let options: Vec<&str> = vec!["SAT-3", "RADIO", "ALGEBRAIC-FUNCTION"];
     let problem_name_answer: Result<&str, InquireError> =
         Select::new("Which problem to run?", options).prompt();
-    let problem_name = match problem_name_answer {
-        Ok(problem_name) => problem_name,
-        Err(_) => panic!("Problem not found"),
-    };
+    let problem_name =  problem_name_answer.expect("Problem not found");
     config_tracing(problem_name)?;
 
     let instances_options: Vec<String> =
@@ -79,14 +76,11 @@ async fn main() -> Result<()> {
         Select::new("Which instance to run?", instances_options)
             .with_formatter(&format_path)
             .prompt();
-    let instance = match instance_answer {
-        Ok(instance) => instance,
-        Err(_) => panic!("Instance not found"),
-    };
+    let instance = instance_answer.expect("Instance not found");
 
     let config_options: Vec<String> = fs::read_dir("data/config")
         .unwrap()
-        .map(|entry| entry.unwrap())
+        .map(std::result::Result::unwrap)
         .filter(|entry| {
             entry.path().extension().unwrap() == "json"
                 && entry
@@ -107,10 +101,7 @@ async fn main() -> Result<()> {
         Select::new("Which config to run?", config_options)
             .with_formatter(&format_path)
             .prompt();
-    let config_path = match config_answer {
-        Ok(config) => config,
-        Err(_) => panic!("Config not found"),
-    };
+    let config_path = config_answer.expect("Config not found");
 
     let (problem, config) = problem_factory::problem_factory(problem_name, &instance, &config_path);
     let ga_framework = Framework::new(problem, config);

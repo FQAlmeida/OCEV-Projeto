@@ -52,6 +52,15 @@ pub struct Config {
 }
 
 impl Config {
+    /// # Errors
+    ///
+    /// Will return `Err` if `filename` does not exist or the user does not have
+    /// permission to read it.
+    ///
+    /// # Panics
+    ///
+    /// Will return `Err` if `filename` does not exist or the user does not have
+    /// permission to read it.
     pub fn new<P>(path: P) -> Result<Self>
     where
         P: AsRef<Path>,

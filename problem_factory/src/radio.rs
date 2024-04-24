@@ -8,7 +8,7 @@ use individual_creation::{Individual, IndividualType};
 use loader_config::Config;
 use problem::Problem;
 
-pub struct RadioProblem {
+pub struct ProblemRadio {
     max_h: f64,
     max_fo: f64,
     qtd_employees: usize,
@@ -18,12 +18,12 @@ pub struct RadioProblem {
 
 pub struct Radio {
     config: Config,
-    problem: RadioProblem,
+    problem: ProblemRadio,
 }
 
 impl Radio {
-    pub fn new(problem: RadioProblem, config: Config) -> Self {
-        Radio { problem, config }
+    pub fn new(problem: ProblemRadio, config: Config) -> Self {
+        Radio { config, problem }
     }
 }
 
@@ -33,7 +33,7 @@ impl Problem for Radio {
             .chromosome
             .iter()
             .map(|i| match i {
-                IndividualType::Binary(value) => *value as u32 as f64,
+                IndividualType::Binary(value) => f64::from(u32::from(*value)),
                 IndividualType::Permuted(_) => todo!(),
             })
             .collect();
@@ -74,18 +74,14 @@ impl Problem for Radio {
         let config = self.get_config();
         let decoded_individual = self.decode(individual);
         let obj = self.normed_objective(&decoded_individual);
-        debug_assert!(obj == self.objective(&decoded_individual));
         let constraint = self.constraint(&decoded_individual);
-        let fitness_result = obj + config.constraint_penalty * constraint;
-        debug_assert!(fitness_result == self.objective(&decoded_individual));
-        fitness_result
+        obj + config.constraint_penalty * constraint
     }
 
     fn objective(&self, individual: &[f64]) -> f64 {
         let qtd_1 = individual[0];
         let qtd_2 = individual[1];
 
-        
         self.problem.profit_a * qtd_1 + self.problem.profit_b * qtd_2
     }
 
@@ -102,7 +98,7 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-pub fn load_instance<P>(filename: P) -> io::Result<RadioProblem>
+pub fn load_instance<P>(filename: P) -> io::Result<ProblemRadio>
 where
     P: AsRef<Path>,
 {
@@ -115,7 +111,7 @@ where
                 .collect();
         })
         .collect::<Vec<Vec<f64>>>();
-    Ok(RadioProblem {
+    Ok(ProblemRadio {
         profit_a: problem[0][0],
         profit_b: problem[0][1],
         qtd_employees: problem[1][0] as usize,

@@ -40,7 +40,7 @@ impl Display for IndividualTypeVecDisplay {
         }
 
         comma_separated.push_str(self.0[self.0.len() - 1].to_string().as_str());
-        write!(f, "{}]", comma_separated)
+        write!(f, "{comma_separated}]")
     }
 }
 
@@ -85,37 +85,34 @@ impl<'a> GA<'a> {
             .iter()
             .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .unwrap();
-        match self.best_individual_value {
-            Some(current_best) => {
-                if *best_individual_value >= current_best {
-                    self.best_individual_value = Some(*best_individual_value);
-                    self.best_individual =
-                        Some(self.population.individuals[*best_individual_index].clone());
-                } else {
-                    self.generations_without_improvement += 1;
-                    if self.config.elitism {
-                        self.population.individuals[*worst_individual_index] =
-                            self.best_individual.as_ref().unwrap().clone();
-                        new_result = new_result
-                            .iter()
-                            .map(|tuple| {
-                                if tuple.0 == *worst_individual_index {
-                                    return (
-                                        *worst_individual_index,
-                                        self.best_individual_value.unwrap(),
-                                    );
-                                }
-                                *tuple
-                            })
-                            .collect();
-                    }
-                }
-            }
-            None => {
+        if let Some(current_best) = self.best_individual_value {
+            if *best_individual_value >= current_best {
                 self.best_individual_value = Some(*best_individual_value);
                 self.best_individual =
                     Some(self.population.individuals[*best_individual_index].clone());
+            } else {
+                self.generations_without_improvement += 1;
+                if self.config.elitism {
+                    self.population.individuals[*worst_individual_index] =
+                        self.best_individual.as_ref().unwrap().clone();
+                    new_result = new_result
+                        .iter()
+                        .map(|tuple| {
+                            if tuple.0 == *worst_individual_index {
+                                return (
+                                    *worst_individual_index,
+                                    self.best_individual_value.unwrap(),
+                                );
+                            }
+                            *tuple
+                        })
+                        .collect();
+                }
             }
+        } else {
+            self.best_individual_value = Some(*best_individual_value);
+            self.best_individual =
+                Some(self.population.individuals[*best_individual_index].clone());
         }
         new_result
     }
@@ -140,7 +137,7 @@ impl<'a> GA<'a> {
 
         self.update_best(&result)
     }
-    fn selection(&self, result: Vec<(usize, f64)>) -> Vec<(usize, usize)> {
+    fn selection(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)> {
         let pop_size = self.config.pop_config.pop_size;
         let kp = self.config.kp;
         let mut rng = rand::thread_rng();
@@ -276,6 +273,8 @@ impl<'a> GA<'a> {
         );
     }
 
+    /// # Panics
+    /// If I did shit
     pub fn run(&mut self) -> (Option<Individual>, Option<f64>) {
         let sty = ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
@@ -289,22 +288,6 @@ impl<'a> GA<'a> {
         for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
             let new_result = self.update_best(&result);
-            debug_assert!(
-                (new_result
-                    .iter()
-                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                    .unwrap()
-                    .1
-                    == self.best_individual_value.unwrap()), // || !self.config.elitism
-                "a = {}, b = {}, elitism = {}",
-                new_result
-                    .iter()
-                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                    .unwrap()
-                    .1,
-                self.best_individual_value.unwrap(),
-                self.config.elitism
-            );
             let newer_result =
                 if self.generations_without_improvement >= self.config.generations_to_genocide {
                     self.genocide()
@@ -312,43 +295,15 @@ impl<'a> GA<'a> {
                     new_result
                 };
 
-            debug_assert!(
-                (newer_result
-                    .iter()
-                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                    .unwrap()
-                    .1
-                    == self.best_individual_value.unwrap()), // || !self.config.elitism
-                "a = {}, b = {}, elitism = {}",
-                newer_result
-                    .iter()
-                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                    .unwrap()
-                    .1,
-                self.best_individual_value.unwrap(),
-                self.config.elitism
-            );
-
             self.log_generation(generation, &newer_result);
-            let mating_pool = self.selection(newer_result);
+
+            let mating_pool = self.selection(&newer_result);
             let mut new_population = self.crossover(&mating_pool);
             new_population = self.mutation(&new_population);
 
-            debug_assert!(self.best_individual.is_some());
-            debug_assert!(self.best_individual_value.is_some());
-            debug_assert!(
-                self.problem
-                    .objective(&self.problem.decode(self.best_individual.as_ref().unwrap()))
-                    == self.best_individual_value.unwrap(),
-                "a = {}, b = {}",
-                self.problem
-                    .objective(&self.problem.decode(self.best_individual.as_ref().unwrap()))
-                    == self.best_individual_value.unwrap(),
-                self.best_individual_value.unwrap()
-            );
-
             self.population = new_population;
-            pb.inc(1)
+
+            pb.inc(1);
         }
         self.log_run_result();
         pb.finish_with_message("Run completed");

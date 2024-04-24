@@ -1,4 +1,4 @@
-use std::ops::Deref;
+
 
 use genetic_algorithm::GA;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
@@ -13,11 +13,12 @@ pub struct Framework {
 }
 
 impl Framework {
-    pub fn new(problem: Box<dyn Problem + Send + Sync>, config: Config) -> Framework {
+    #[must_use] pub fn new(problem: Box<dyn Problem + Send + Sync>, config: Config) -> Framework {
         Framework { problem, config }
     }
-
-    pub fn run(&self) -> (Option<Individual>, Option<f64>) {
+    /// # Panics
+    /// If I did shit
+    #[must_use] pub fn run(&self) -> (Option<Individual>, Option<f64>) {
         let mut best_individual: Option<Individual> = None;
         let mut result: Option<f64> = None;
         let m = MultiProgress::new();
@@ -36,7 +37,7 @@ impl Framework {
         info!("Config: {}", serde_json::to_string(&self.config).unwrap());
         for run in 1..=self.config.qtd_runs {
             info!("Run: {}", run);
-            let mut ga = GA::new(self.problem.deref(), &self.config, &m);
+            let mut ga = GA::new(&*self.problem, &self.config, &m);
             let (new_individual, new_result) = &ga.run();
             if result.is_none() || new_result.unwrap() > result.unwrap() {
                 (best_individual, result) =

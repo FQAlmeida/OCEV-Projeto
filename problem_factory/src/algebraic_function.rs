@@ -8,7 +8,7 @@ use individual_creation::{Individual, IndividualType};
 use loader_config::Config;
 use problem::Problem;
 
-pub struct AlgebraicFunctionProblem {
+pub struct ProblemAlgebraicFunction {
     max_y: f64,
     max_x: f64,
     min_y: f64,
@@ -17,12 +17,12 @@ pub struct AlgebraicFunctionProblem {
 
 pub struct AlgebraicFunction {
     config: Config,
-    problem: AlgebraicFunctionProblem,
+    problem: ProblemAlgebraicFunction,
 }
 
 impl AlgebraicFunction {
-    pub fn new(problem: AlgebraicFunctionProblem, config: Config) -> Self {
-        AlgebraicFunction { problem, config }
+    pub fn new(problem: ProblemAlgebraicFunction, config: Config) -> Self {
+        AlgebraicFunction { config, problem }
     }
 }
 
@@ -32,7 +32,7 @@ impl Problem for AlgebraicFunction {
             .chromosome
             .iter()
             .map(|i| match i {
-                IndividualType::Binary(value) => *value as u32 as f64,
+                IndividualType::Binary(value) => f64::from(u32::from(*value)),
                 IndividualType::Permuted(_) => todo!(),
             })
             .fold(0.0, |a, b| 2.0 * a + b);
@@ -59,16 +59,13 @@ impl Problem for AlgebraicFunction {
         let config = self.get_config();
         let decoded_individual = self.decode(individual);
         let obj = self.normed_objective(&decoded_individual);
-        debug_assert!(obj == self.objective(&decoded_individual));
         let constraint = self.constraint(&decoded_individual);
-        let fitness_result = obj + config.constraint_penalty * constraint;
-        debug_assert!(fitness_result == self.objective(&decoded_individual));
-        fitness_result
+        obj + config.constraint_penalty * constraint
     }
 
     fn objective(&self, individual: &[f64]) -> f64 {
         let x = individual[0];
-        
+
         f64::cos(20.0 * x) - (x.abs() / 2.0) + (x.powf(3.0) / 4.0)
     }
 
@@ -85,7 +82,7 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-pub fn load_instance<P>(filename: P) -> io::Result<AlgebraicFunctionProblem>
+pub fn load_instance<P>(filename: P) -> io::Result<ProblemAlgebraicFunction>
 where
     P: AsRef<Path>,
 {
@@ -98,7 +95,7 @@ where
                 .collect();
         })
         .collect::<Vec<Vec<f64>>>();
-    Ok(AlgebraicFunctionProblem {
+    Ok(ProblemAlgebraicFunction {
         min_x: problem[0][0],
         max_x: problem[0][1],
         min_y: problem[1][0],

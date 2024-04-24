@@ -11,13 +11,13 @@ use rayon::prelude::*;
 
 pub struct SAT3 {
     config: Config,
-    clause_id: Vec<(i32, i32, i32)>,
+    clause_id: Vec<(u32, u32, u32)>,
     clause_neg: Vec<(bool, bool, bool)>,
 }
 
 impl SAT3 {
-    pub fn new(problem: Vec<(i32, i32, i32)>, config: Config) -> SAT3 {
-        let (clause_id, clause_neg) = SAT3::clauses(&problem);
+    pub fn new(problem: &[(i32, i32, i32)], config: Config) -> SAT3 {
+        let (clause_id, clause_neg) = SAT3::clauses(problem);
         SAT3 {
             config,
             clause_id,
@@ -32,7 +32,7 @@ impl Problem for SAT3 {
             .chromosome
             .iter()
             .map(|i| match i {
-                IndividualType::Binary(value) => *value as u32 as f64,
+                IndividualType::Binary(value) => f64::from(u32::from(*value)),
                 IndividualType::Permuted(_) => todo!(),
             })
             .collect();
@@ -54,11 +54,8 @@ impl Problem for SAT3 {
         let config = self.get_config();
         let decoded_individual = self.decode(individual);
         let obj = self.normed_objective(&decoded_individual);
-        debug_assert!(obj == self.objective(&decoded_individual));
         let constraint = self.constraint(&decoded_individual);
-        let fitness_result = obj + config.constraint_penalty * constraint;
-        debug_assert!(fitness_result == self.objective(&decoded_individual));
-        fitness_result
+        obj + config.constraint_penalty * constraint
     }
 
     fn objective(&self, individual: &[f64]) -> f64 {
@@ -69,8 +66,8 @@ impl Problem for SAT3 {
             .map(|i| {
                 let (clause, clause_neg) = i;
                 let solution = individual;
-                let evaluated_solution = self.eval_solution(solution, clause, clause_neg);
-                evaluated_solution as u32 as f64
+                let evaluated_solution = SAT3::eval_solution(solution, clause, *clause_neg);
+                f64::from(u32::from(evaluated_solution))
             })
             .sum::<f64>();
         clauses_satisfied
@@ -80,12 +77,18 @@ impl Problem for SAT3 {
         String::from("SAT-3")
     }
 }
-type ClausesType = (Vec<(i32, i32, i32)>, Vec<(bool, bool, bool)>);
+type ClausesType = (Vec<(u32, u32, u32)>, Vec<(bool, bool, bool)>);
 impl SAT3 {
     fn clauses(problem: &[(i32, i32, i32)]) -> ClausesType {
         let clause_id = problem
             .iter()
-            .map(|(a, b, c)| (a.abs() - 1, b.abs() - 1, c.abs() - 1))
+            .map(|(a, b, c)| {
+                (
+                    (a.abs() - 1) as u32,
+                    (b.abs() - 1) as u32,
+                    (c.abs() - 1) as u32,
+                )
+            })
             .collect();
         let clause_neg = problem
             .iter()
@@ -95,20 +98,19 @@ impl SAT3 {
     }
 
     fn eval_solution(
-        &self,
         solution: &[f64],
-        clause_id: &(i32, i32, i32),
-        clause_neg: &(bool, bool, bool),
+        clause_id: &(u32, u32, u32),
+        clause_neg: (bool, bool, bool),
     ) -> bool {
         let (a, b, c) = clause_id;
         let (na, nb, nc) = clause_neg;
 
-        let solution_a: bool = solution[*a as usize] == 1.0;
-        let solution_b: bool = solution[*b as usize] == 1.0;
-        let solution_c: bool = solution[*c as usize] == 1.0;
-        let checked_solution_a = (!solution_a && *na) || (solution_a && !*na);
-        let checked_solution_b = (!solution_b && *nb) || (solution_b && !*nb);
-        let checked_solution_c = (!solution_c && *nc) || (solution_c && !*nc);
+        let solution_a: bool = (solution[*a as usize] - 1.0_f64).abs() < f64::EPSILON;
+        let solution_b: bool = (solution[*b as usize] - 1.0_f64).abs() < f64::EPSILON;
+        let solution_c: bool = (solution[*c as usize] - 1.0_f64).abs() < f64::EPSILON;
+        let checked_solution_a = (!solution_a && na) || (solution_a && !na);
+        let checked_solution_b = (!solution_b && nb) || (solution_b && !nb);
+        let checked_solution_c = (!solution_c && nc) || (solution_c && !nc);
         checked_solution_a || checked_solution_b || checked_solution_c
     }
 }
