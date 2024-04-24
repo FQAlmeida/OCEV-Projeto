@@ -32,9 +32,7 @@ impl Problem for SAT3 {
             .chromosome
             .iter()
             .map(|i| match i {
-                IndividualType::Binary(value) => {
-                    *value as u32 as f64
-                }
+                IndividualType::Binary(value) => *value as u32 as f64,
                 IndividualType::Permuted(_) => todo!(),
             })
             .collect();
@@ -44,11 +42,11 @@ impl Problem for SAT3 {
         &self.config
     }
 
-    fn normed_objective(&self, individual: &Vec<f64>) -> f64 {
+    fn normed_objective(&self, individual: &[f64]) -> f64 {
         self.objective(individual)
     }
 
-    fn constraint(&self, _: &Vec<f64>) -> f64 {
+    fn constraint(&self, _: &[f64]) -> f64 {
         0.0
     }
 
@@ -63,7 +61,7 @@ impl Problem for SAT3 {
         fitness_result
     }
 
-    fn objective(&self, individual: &Vec<f64>) -> f64 {
+    fn objective(&self, individual: &[f64]) -> f64 {
         let clauses_satisfied: f64 = self
             .clause_id
             .par_iter()
@@ -82,9 +80,9 @@ impl Problem for SAT3 {
         String::from("SAT-3")
     }
 }
-
+type ClausesType = (Vec<(i32, i32, i32)>, Vec<(bool, bool, bool)>);
 impl SAT3 {
-    fn clauses(problem: &Vec<(i32, i32, i32)>) -> (Vec<(i32, i32, i32)>, Vec<(bool, bool, bool)>) {
+    fn clauses(problem: &[(i32, i32, i32)]) -> ClausesType {
         let clause_id = problem
             .iter()
             .map(|(a, b, c)| (a.abs() - 1, b.abs() - 1, c.abs() - 1))
@@ -98,7 +96,7 @@ impl SAT3 {
 
     fn eval_solution(
         &self,
-        solution: &Vec<f64>,
+        solution: &[f64],
         clause_id: &(i32, i32, i32),
         clause_neg: &(bool, bool, bool),
     ) -> bool {

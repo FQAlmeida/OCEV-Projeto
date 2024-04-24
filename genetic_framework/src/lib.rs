@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use genetic_algorithm::GA;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::Individual;
@@ -34,13 +36,11 @@ impl Framework {
         info!("Config: {}", serde_json::to_string(&self.config).unwrap());
         for run in 1..=self.config.qtd_runs {
             info!("Run: {}", run);
-            let mut ga = GA::new(&self.problem, &self.config, &m);
+            let mut ga = GA::new(self.problem.deref(), &self.config, &m);
             let (new_individual, new_result) = &ga.run();
             if result.is_none() || new_result.unwrap() > result.unwrap() {
-                (best_individual, result) = (
-                    Some(new_individual.as_ref().unwrap().clone()),
-                    *new_result,
-                );
+                (best_individual, result) =
+                    (Some(new_individual.as_ref().unwrap().clone()), *new_result);
             }
             pb.inc(1);
             info!("End Run: {}", run);

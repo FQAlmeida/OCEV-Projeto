@@ -12,7 +12,7 @@ use rayon::iter::{once, IndexedParallelIterator, IntoParallelRefIterator, Parall
 
 pub struct GA<'a> {
     pub config: &'a Config,
-    pub problem: &'a Box<dyn Problem + Sync + Send>,
+    pub problem: &'a (dyn Problem + Sync + Send),
     pub population: Population,
     pub best_individual: Option<Individual>,
     pub best_individual_value: Option<f64>,
@@ -46,7 +46,7 @@ impl Display for IndividualTypeVecDisplay {
 
 impl<'a> GA<'a> {
     pub fn new(
-        problem: &'a Box<dyn Problem + Sync + Send>,
+        problem: &'a (dyn Problem + Sync + Send),
         config: &'a Config,
         multi_progress_bar: &'a MultiProgress,
     ) -> Self {
@@ -75,8 +75,8 @@ impl<'a> GA<'a> {
         fitness
     }
 
-    fn update_best(&mut self, result: &Vec<(usize, f64)>) -> Vec<(usize, f64)> {
-        let mut new_result = result.clone();
+    fn update_best(&mut self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
+        let mut new_result = result.to_vec();
         let (best_individual_index, best_individual_value) = result
             .iter()
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
@@ -137,7 +137,7 @@ impl<'a> GA<'a> {
                     .clone();
             });
         let result = self.evaluate();
-        
+
         self.update_best(&result)
     }
     fn selection(&self, result: Vec<(usize, f64)>) -> Vec<(usize, usize)> {
@@ -222,7 +222,7 @@ impl<'a> GA<'a> {
                 chromosome: new_individual.collect(),
             }
         });
-        
+
         Population {
             individuals: mutated_population.collect(),
         }
@@ -258,7 +258,7 @@ impl<'a> GA<'a> {
             None => {}
         };
     }
-    fn log_generation(&self, generation: usize, result: &Vec<(usize, f64)>) {
+    fn log_generation(&self, generation: usize, result: &[(usize, f64)]) {
         let result_mapped = result.iter().map(|(_, value)| value);
         info!(
             "State Individual: {} {} {} {} {}",

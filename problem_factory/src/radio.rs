@@ -54,11 +54,11 @@ impl Problem for Radio {
         &self.config
     }
 
-    fn normed_objective(&self, individual: &Vec<f64>) -> f64 {
+    fn normed_objective(&self, individual: &[f64]) -> f64 {
         self.objective(individual) / self.problem.max_fo
     }
 
-    fn constraint(&self, individual: &Vec<f64>) -> f64 {
+    fn constraint(&self, individual: &[f64]) -> f64 {
         let qtd_1 = individual[0];
         let qtd_2 = individual[1];
         let penalty =
@@ -81,7 +81,7 @@ impl Problem for Radio {
         fitness_result
     }
 
-    fn objective(&self, individual: &Vec<f64>) -> f64 {
+    fn objective(&self, individual: &[f64]) -> f64 {
         let qtd_1 = individual[0];
         let qtd_2 = individual[1];
 

@@ -46,12 +46,12 @@ impl Problem for AlgebraicFunction {
         &self.config
     }
 
-    fn normed_objective(&self, individual: &Vec<f64>) -> f64 {
+    fn normed_objective(&self, individual: &[f64]) -> f64 {
         (self.objective(individual) - self.problem.min_y)
             / (self.problem.max_y - self.problem.min_y)
     }
 
-    fn constraint(&self, _: &Vec<f64>) -> f64 {
+    fn constraint(&self, _: &[f64]) -> f64 {
         0.0
     }
 
@@ -66,7 +66,7 @@ impl Problem for AlgebraicFunction {
         fitness_result
     }
 
-    fn objective(&self, individual: &Vec<f64>) -> f64 {
+    fn objective(&self, individual: &[f64]) -> f64 {
         let x = individual[0];
         
         f64::cos(20.0 * x) - (x.abs() / 2.0) + (x.powf(3.0) / 4.0)
