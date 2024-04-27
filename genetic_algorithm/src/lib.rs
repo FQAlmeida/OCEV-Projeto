@@ -1,6 +1,3 @@
-use std::fmt::{Display, Error, Formatter};
-
-use anyhow::Result;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::{Individual, IndividualType, Population};
 use loader_config::Config;
@@ -8,9 +5,12 @@ use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
+#[cfg(parallel)]
 use rayon::iter::{
     once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
+#[cfg(not(parallel))]
+use std::iter::once;
 
 pub struct GA<'a> {
     pub config: &'a Config,
@@ -22,29 +22,29 @@ pub struct GA<'a> {
     generations_without_improvement: usize,
 }
 
-struct IndividualTypeVecDisplay(Vec<IndividualType>);
+// struct IndividualTypeVecDisplay(IndividualType);
 
-impl Display for IndividualTypeVecDisplay {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        let mut comma_separated = String::from("[");
+// impl Display for IndividualTypeVecDisplay {
+//     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+//         let mut comma_separated = String::from("[");
 
-        for num in &self.0[0..self.0.len() - 1] {
-            match num {
-                IndividualType::Binary(value) => {
-                    comma_separated.push_str(value.to_string().as_str());
-                    comma_separated.push_str(", ");
-                }
-                IndividualType::Permuted(value) => {
-                    comma_separated.push_str(value.to_string().as_str());
-                    comma_separated.push_str(", ");
-                }
-            }
-        }
+//         for num in &self.0[0..self.0.len() - 1] {
+//             match num {
+//                 IndividualType::Binary(value) => {
+//                     comma_separated.push_str(value.to_string().as_str());
+//                     comma_separated.push_str(", ");
+//                 }
+//                 IndividualType::Permuted(value) => {
+//                     comma_separated.push_str(value.to_string().as_str());
+//                     comma_separated.push_str(", ");
+//                 }
+//             }
+//         }
 
-        comma_separated.push_str(self.0[self.0.len() - 1].to_string().as_str());
-        write!(f, "{comma_separated}]")
-    }
-}
+//         comma_separated.push_str(self.0[self.0.len() - 1].to_string().as_str());
+//         write!(f, "{comma_separated}]")
+//     }
+// }
 
 impl<'a> GA<'a> {
     pub fn new(
@@ -55,7 +55,7 @@ impl<'a> GA<'a> {
         let population = Population::new(
             config.pop_config.pop_size,
             config.pop_config.dim,
-            &IndividualType::Binary(true),
+            &IndividualType::Binary(vec![]),
         );
         GA {
             problem,
@@ -70,12 +70,17 @@ impl<'a> GA<'a> {
 
     fn evaluate(&self) -> Vec<(usize, f64)> {
         let population = &self.population.individuals;
-        let fitness = population
-            .par_iter()
+
+        #[cfg(parallel)]
+        let population_iter = population.par_iter();
+        #[cfg(not(parallel))]
+        let population_iter = population.iter();
+
+        
+        population_iter
             .enumerate()
             .map(|(i, individual)| (i, self.problem.fitness(individual)))
-            .collect();
-        fitness
+            .collect()
     }
 
     fn update_best(&mut self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
@@ -127,7 +132,7 @@ impl<'a> GA<'a> {
         let new_population = Population::new(
             self.config.pop_config.pop_size / 2,
             self.config.pop_config.dim,
-            &IndividualType::Binary(true),
+            &IndividualType::Binary(vec![]),
         );
         let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
         let mut sequence: RandomSequence<u16> = config.into_iter();
@@ -186,56 +191,46 @@ impl<'a> GA<'a> {
         mating_pool
     }
 
-    fn crossover(&self, mating_pool: &Vec<(usize, usize)>) -> Population {
-        // let mut new_population = Vec::with_capacity(self.config.pop_config.pop_size);
+    fn crossover(&self, mating_pool: &[(usize, usize)]) -> Population {
+        #[cfg(parallel)]
+        let mating_pool_iter = mating_pool.par_iter();
+        #[cfg(not(parallel))]
+        let mating_pool_iter = mating_pool.iter();
+
         let crossover_chance = self.config.crossover_chance;
-        let couples_mapped =
-            mating_pool.par_iter().map(|(parent1, parent2)| {
-                let mut rng = rand::thread_rng();
-                let crossover = rng.gen::<f64>();
-                if crossover <= crossover_chance {
-                    let crossover_point =
-                        rng.gen_range(0..self.config.pop_config.dim);
-                    let mut child1 =
-                        self.population.individuals[*parent1].clone();
-                    let mut child2 =
-                        self.population.individuals[*parent2].clone();
-                    for i in 0..crossover_point {
-                        child1.chromosome[i] =
-                            self.population.individuals[*parent2].chromosome[i];
-                        child2.chromosome[i] =
-                            self.population.individuals[*parent1].chromosome[i];
-                    }
-                    return (child1, child2);
-                }
-                let child1 = self.population.individuals[*parent1].clone();
-                let child2 = self.population.individuals[*parent2].clone();
-                (child1, child2)
-            });
+        let couples_mapped = mating_pool_iter.map(|(parent1, parent2)| {
+            let mut rng = rand::thread_rng();
+            let crossover = rng.gen::<f64>();
+            let mut child1 = self.population.individuals[*parent1].clone();
+            let mut child2 = self.population.individuals[*parent2].clone();
+            if crossover <= crossover_chance {
+                let crossover_point =
+                    rng.gen_range(0..self.config.pop_config.dim);
+                    (child1, child2) = child1.crossover(
+                        &child2,
+                        crossover_point);
+                
+            }
+            (child1, child2)
+        });
         let new_population: Population = Population {
             individuals: couples_mapped
                 .flat_map(|tuple| once(tuple.0).chain(once(tuple.1)))
                 .collect(),
         };
+
         new_population
     }
 
     fn mutation(&self, new_population: &Population) -> Population {
+        #[cfg(parallel)]
+        let individuals_iter = new_population.individuals.par_iter();
+        #[cfg(not(parallel))]
+        let individuals_iter = new_population.individuals.iter();
+
         let mutation_chance = self.config.mutation_chance;
-        let mutated_population =
-            new_population.individuals.par_iter().map(|individual| {
-                let new_individual = individual.chromosome.iter().map(|gene| {
-                    let mut rng = rand::thread_rng();
-                    let mutation = rng.gen::<f64>();
-                    if mutation <= mutation_chance {
-                        return gene.mutate();
-                    }
-                    *gene
-                });
-                Individual {
-                    chromosome: new_individual.collect(),
-                }
-            });
+        let mutated_population = individuals_iter
+            .map(|individual| individual.mutate(mutation_chance));
 
         Population {
             individuals: mutated_population.collect(),
@@ -248,9 +243,7 @@ impl<'a> GA<'a> {
             Some(best_individual) => {
                 info!(
                     "Best Individual: {}",
-                    IndividualTypeVecDisplay(
-                        best_individual.chromosome.clone()
-                    )
+                    best_individual.chromosome.clone()
                 );
                 info!(
                     "Best Individual Value: {}",

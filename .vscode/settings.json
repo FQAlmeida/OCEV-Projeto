@@ -9,5 +9,7 @@
         "projeto",
         "rngs",
         "serde"
-    ]
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic"
 }

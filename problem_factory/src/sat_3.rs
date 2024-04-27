@@ -7,6 +7,8 @@ use std::{
 use individual_creation::{Individual, IndividualType};
 use loader_config::Config;
 use problem::Problem;
+
+#[cfg(parallel)]
 use rayon::prelude::*;
 
 pub struct SAT3 {
@@ -28,14 +30,13 @@ impl SAT3 {
 
 impl Problem for SAT3 {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        return individual
-            .chromosome
-            .iter()
-            .map(|i| match i {
-                IndividualType::Binary(value) => f64::from(u32::from(*value)),
-                IndividualType::Permuted(_) => todo!(),
-            })
-            .collect();
+        match &individual.chromosome {
+            IndividualType::Binary(value) => {
+                value.iter().map(|&v| f64::from(u32::from(v)))
+            }
+            IndividualType::Permuted(_) => todo!(),
+        }
+        .collect()
     }
 
     fn get_config(&self) -> &Config {
@@ -59,10 +60,19 @@ impl Problem for SAT3 {
     }
 
     fn objective(&self, individual: &[f64]) -> f64 {
-        let clauses_satisfied: f64 = self
-            .clause_id
-            .par_iter()
-            .zip(self.clause_neg.par_iter())
+        #[cfg(parallel)]
+        let clauses_neg_iter = self.clause_neg.par_iter();
+        #[cfg(parallel)]
+        let clauses_satisfied_iter = self.clause_id.par_iter();
+
+        #[cfg(not(parallel))]
+        let clauses_neg_iter = self.clause_neg.iter();
+        #[cfg(not(parallel))]
+        let clauses_satisfied_iter = self.clause_id.iter();
+
+        
+        clauses_satisfied_iter
+            .zip(clauses_neg_iter)
             .map(|i| {
                 let (clause, clause_neg) = i;
                 let solution = individual;
@@ -70,8 +80,7 @@ impl Problem for SAT3 {
                     SAT3::eval_solution(solution, clause, *clause_neg);
                 f64::from(u32::from(evaluated_solution))
             })
-            .sum::<f64>();
-        clauses_satisfied
+            .sum::<f64>()
     }
 
     fn get_name(&self) -> String {

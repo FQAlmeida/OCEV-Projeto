@@ -29,14 +29,13 @@ impl Radio {
 
 impl Problem for Radio {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        let values: Vec<f64> = individual
-            .chromosome
-            .iter()
-            .map(|i| match i {
-                IndividualType::Binary(value) => f64::from(u32::from(*value)),
-                IndividualType::Permuted(_) => todo!(),
-            })
-            .collect();
+        let values: Vec<f64> = match &individual.chromosome {
+            IndividualType::Binary(value) => {
+                value.iter().map(|&v| f64::from(u32::from(v)))
+            }
+            IndividualType::Permuted(_) => todo!(),
+        }
+        .collect();
         let qtd_line_a: f64 = values[0..5]
             .to_owned()
             .clone()

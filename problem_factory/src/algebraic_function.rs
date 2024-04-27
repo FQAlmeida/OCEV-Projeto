@@ -28,19 +28,16 @@ impl AlgebraicFunction {
 
 impl Problem for AlgebraicFunction {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        let decimal = individual
-            .chromosome
-            .iter()
-            .map(|i| match i {
-                IndividualType::Binary(value) => f64::from(u32::from(*value)),
-                IndividualType::Permuted(_) => todo!(),
-            })
-            .fold(0.0, |a, b| 2.0 * a + b);
+        let decimal = match &individual.chromosome {
+            IndividualType::Binary(value) => {
+                value.iter().map(|&v| f64::from(u32::from(v)))
+            }
+            IndividualType::Permuted(_) => todo!(),
+        }
+        .fold(0.0, |a, b| 2.0 * a + b);
         let value = self.problem.min_x
             + ((self.problem.max_x - self.problem.min_x)
-                * (decimal
-                    / (2.0_f64.powf(individual.chromosome.len() as f64)
-                        - 1.0)));
+                * (decimal / (2.0_f64.powf(16.0) - 1.0)));
         vec![value]
     }
 

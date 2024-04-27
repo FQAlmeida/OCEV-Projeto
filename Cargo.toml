@@ -5,6 +5,11 @@ members = [
     "individual_creation", 
     "loader_config", 
     "problem", 
-    "loader_config"
-, "problem_factory", "ga_cli"]
+    "loader_config", 
+    "problem_factory", 
+    "ga_cli"
+]
 resolver = "2"
+
+[profile.release]
+debug = 1
