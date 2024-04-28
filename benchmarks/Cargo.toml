@@ -1,0 +1,21 @@
+[package]
+name = "benchmarks"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+problem_factory = {path="../problem_factory"}
+genetic_framework = {path="../genetic_framework"}
+loader_config = {path = "../loader_config"}
+anyhow = {version = "1.0.82"}
+
+
+[dev-dependencies]
+criterion = {version = "0.5.1", features=["html_reports"]}
+
+[[bench]]
+name = "problems_bench"
+harness = false
+
+[features]
+parallel = []

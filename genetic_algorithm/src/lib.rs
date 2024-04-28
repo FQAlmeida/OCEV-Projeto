@@ -5,11 +5,11 @@ use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
-#[cfg(parallel)]
+#[cfg(features="parallel")]
 use rayon::iter::{
     once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
-#[cfg(not(parallel))]
+#[cfg(not(features="parallel"))]
 use std::iter::once;
 
 pub struct GA<'a> {
@@ -71,9 +71,9 @@ impl<'a> GA<'a> {
     fn evaluate(&self) -> Vec<(usize, f64)> {
         let population = &self.population.individuals;
 
-        #[cfg(parallel)]
+        #[cfg(features="parallel")]
         let population_iter = population.par_iter();
-        #[cfg(not(parallel))]
+        #[cfg(not(features="parallel"))]
         let population_iter = population.iter();
 
         
@@ -192,9 +192,9 @@ impl<'a> GA<'a> {
     }
 
     fn crossover(&self, mating_pool: &[(usize, usize)]) -> Population {
-        #[cfg(parallel)]
+        #[cfg(features="parallel")]
         let mating_pool_iter = mating_pool.par_iter();
-        #[cfg(not(parallel))]
+        #[cfg(not(features="parallel"))]
         let mating_pool_iter = mating_pool.iter();
 
         let crossover_chance = self.config.crossover_chance;
@@ -223,9 +223,9 @@ impl<'a> GA<'a> {
     }
 
     fn mutation(&self, new_population: &Population) -> Population {
-        #[cfg(parallel)]
+        #[cfg(features="parallel")]
         let individuals_iter = new_population.individuals.par_iter();
-        #[cfg(not(parallel))]
+        #[cfg(not(features="parallel"))]
         let individuals_iter = new_population.individuals.iter();
 
         let mutation_chance = self.config.mutation_chance;

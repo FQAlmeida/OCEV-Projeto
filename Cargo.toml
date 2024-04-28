@@ -7,9 +7,12 @@ members = [
     "problem", 
     "loader_config", 
     "problem_factory", 
-    "ga_cli"
+    "ga_cli", 
+    "benchmarks",
 ]
 resolver = "2"
 
 [profile.release]
 debug = 1
+
+

@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::fmt::Display;
 
-#[cfg(parallel)]
+#[cfg(features="parallel")]
 use rayon::prelude::*;
 
 #[derive(Clone, Debug)]
@@ -35,9 +35,9 @@ impl IndividualType {
     pub fn mutate(&self, mutation_chance: f64) -> Self {
         match self {
             IndividualType::Binary(genes) => {
-                #[cfg(parallel)]
+                #[cfg(features="parallel")]
                 let genes_iter = genes.par_iter();
-                #[cfg(not(parallel))]
+                #[cfg(not(features="parallel"))]
                 let genes_iter = genes.iter();
 
                 IndividualType::Binary(
@@ -67,9 +67,9 @@ impl IndividualType {
                 IndividualType::Binary(genes_1),
                 IndividualType::Binary(genes_2),
             ) => {
-                #[cfg(parallel)]
+                #[cfg(features="parallel")]
                 let genes_iter = genes_1.par_iter().zip(genes_2.par_iter());
-                #[cfg(not(parallel))]
+                #[cfg(not(features="parallel"))]
                 let genes_iter = genes_1.iter().zip(genes_2);
 
                 let (child_genes_1, child_genes_2) = genes_iter

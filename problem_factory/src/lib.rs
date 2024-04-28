@@ -3,10 +3,10 @@ use std::path::Path;
 use loader_config::Config;
 use problem::Problem;
 
-mod sat_3;
+pub mod sat_3;
 use sat_3::SAT3;
-mod algebraic_function;
-mod radio;
+pub mod algebraic_function;
+pub mod radio;
 use algebraic_function::AlgebraicFunction;
 use radio::Radio;
 

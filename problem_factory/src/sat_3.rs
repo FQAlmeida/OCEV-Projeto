@@ -8,7 +8,7 @@ use individual_creation::{Individual, IndividualType};
 use loader_config::Config;
 use problem::Problem;
 
-#[cfg(parallel)]
+#[cfg(features="parallel")]
 use rayon::prelude::*;
 
 pub struct SAT3 {
@@ -60,14 +60,14 @@ impl Problem for SAT3 {
     }
 
     fn objective(&self, individual: &[f64]) -> f64 {
-        #[cfg(parallel)]
+        #[cfg(features="parallel")]
         let clauses_neg_iter = self.clause_neg.par_iter();
-        #[cfg(parallel)]
+        #[cfg(features="parallel")]
         let clauses_satisfied_iter = self.clause_id.par_iter();
 
-        #[cfg(not(parallel))]
+        #[cfg(not(features="parallel"))]
         let clauses_neg_iter = self.clause_neg.iter();
-        #[cfg(not(parallel))]
+        #[cfg(not(features="parallel"))]
         let clauses_satisfied_iter = self.clause_id.iter();
 
         
