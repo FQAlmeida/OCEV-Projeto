@@ -2,7 +2,7 @@ use benchmarks::{run_algebraic, run_radio, run_sat};
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use loader_config::{Config, PopConfig, PopType};
 
-pub const PARALLEL: bool = cfg!(features="parallel");
+pub const PARALLEL: bool = cfg!(feature="parallel");
 
 pub fn sat_benchmark(c: &mut Criterion) {
     for (group_name, configs) in create_sat_configs() {

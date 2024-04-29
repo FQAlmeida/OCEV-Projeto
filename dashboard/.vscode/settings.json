@@ -3,6 +3,8 @@
     "python.analysis.typeCheckingMode": "basic",
     "cSpell.words": [
         "dataframe",
+        "imshow",
+        "nqueen",
         "plotly",
         "prcs",
         "selectbox",

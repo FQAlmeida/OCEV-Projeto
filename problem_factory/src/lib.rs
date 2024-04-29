@@ -1,12 +1,15 @@
 use std::path::Path;
 
 use loader_config::Config;
+use nqueens::NQueens;
 use problem::Problem;
 
 pub mod sat_3;
-use sat_3::SAT3;
 pub mod algebraic_function;
 pub mod radio;
+pub mod nqueens;
+
+use sat_3::SAT3;
 use algebraic_function::AlgebraicFunction;
 use radio::Radio;
 
@@ -34,6 +37,10 @@ where
         "ALGEBRAIC-FUNCTION" => {
             let problem = algebraic_function::load_instance(instance).unwrap();
             (Box::new(AlgebraicFunction::new(problem, config)), config)
+        }
+        "NQUEENS" => {
+            let problem = nqueens::load_instance(instance).unwrap();
+            (Box::new(NQueens::new(problem, config)), config)
         }
         _ => panic!("Problem not found"),
     }

@@ -8,6 +8,8 @@ import plotly.express as px
 import polars as pl
 import streamlit as st
 from read_log_file import read_log_file
+from problems_repr_plotter import problems_dict
+
 
 st.set_page_config(st.session_state.get("title", "Resultados"), "🧬", "wide")
 
@@ -87,6 +89,11 @@ for i, d in enumerate(convergency):
         use_container_width=True,
         hide_index=True,
     )
+    if problem_data.name.upper() in problems_dict:
+        st.plotly_chart(
+            problems_dict[problem_data.name.upper()](problem_data.runs[i].decoded),
+            use_container_width=True,
+        )
     st.plotly_chart(
         px.line(
             data_frame=d.to_pandas(),

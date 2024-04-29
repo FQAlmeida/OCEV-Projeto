@@ -1,8 +1,6 @@
-use rand::Rng;
 use std::fmt::Display;
 
-#[cfg(features="parallel")]
-use rayon::prelude::*;
+use rand::{prelude::SliceRandom, Rng};
 
 #[derive(Clone, Debug)]
 pub enum IndividualType {
@@ -19,25 +17,20 @@ impl Display for IndividualType {
     }
 }
 
-impl From<IndividualType> for Vec<bool> {
-    fn from(val: IndividualType) -> Self {
-        match val {
-            IndividualType::Binary(value) => value,
-            IndividualType::Permuted(value) => {
-                value.iter().map(|&v| v != 0).collect()
-            }
-        }
-    }
-}
+// impl From<IndividualType> for Vec<bool> {
+//     fn from(val: IndividualType) -> Self {
+//         match val {
+//             IndividualType::Binary(value) => value,
+//             IndividualType::Permuted(value) => value.iter().map(|&v| v != 0).collect(),
+//         }
+//     }
+// }
 
 impl IndividualType {
     #[must_use]
     pub fn mutate(&self, mutation_chance: f64) -> Self {
         match self {
             IndividualType::Binary(genes) => {
-                #[cfg(features="parallel")]
-                let genes_iter = genes.par_iter();
-                #[cfg(not(features="parallel"))]
                 let genes_iter = genes.iter();
 
                 IndividualType::Binary(
@@ -53,23 +46,25 @@ impl IndividualType {
                         .collect(),
                 )
             }
-            IndividualType::Permuted(_) => todo!(),
+            IndividualType::Permuted(genes) => {
+                let mut new_genes = genes.clone();
+                for i in 0..genes.len() {
+                    let mut rng = rand::thread_rng();
+                    let mutation = rng.gen::<f64>();
+                    if mutation <= mutation_chance {
+                        let new_gene = rng.gen_range(0..genes.len());
+                        (new_genes[i], new_genes[new_gene]) = (new_genes[new_gene], new_genes[i]);
+                    }
+                }
+                IndividualType::Permuted(new_genes.clone())
+            }
         }
     }
+
     #[must_use]
-    pub fn crossover(
-        &self,
-        parent_2: &IndividualType,
-        crossover_point: usize,
-    ) -> (Self, Self) {
+    pub fn crossover(&self, parent_2: &IndividualType, crossover_point: usize) -> (Self, Self) {
         match (self, parent_2) {
-            (
-                IndividualType::Binary(genes_1),
-                IndividualType::Binary(genes_2),
-            ) => {
-                #[cfg(features="parallel")]
-                let genes_iter = genes_1.par_iter().zip(genes_2.par_iter());
-                #[cfg(not(features="parallel"))]
+            (IndividualType::Binary(genes_1), IndividualType::Binary(genes_2)) => {
                 let genes_iter = genes_1.iter().zip(genes_2);
 
                 let (child_genes_1, child_genes_2) = genes_iter
@@ -87,8 +82,38 @@ impl IndividualType {
                     IndividualType::Binary(child_genes_2),
                 )
             }
-            (IndividualType::Permuted(_), IndividualType::Permuted(_)) => {
-                todo!()
+            (IndividualType::Permuted(genes_1), IndividualType::Permuted(genes_2)) => {
+                let mut visited: Vec<usize> = vec![0];
+                let mut visited_index: usize = genes_1
+                    .iter()
+                    .position(|&v| v == genes_2[0])
+                    .expect("to find index of value");
+                loop {
+                    if visited.contains(&visited_index) {
+                        break;
+                    }
+                    visited.push(visited_index);
+                    visited_index = genes_1
+                        .iter()
+                        .position(|&v| v == genes_2[visited_index])
+                        .expect("to find index of value");
+                }
+
+                let genes_iter = genes_1.iter().zip(genes_2);
+                let (child_genes_1, child_genes_2) = genes_iter
+                    .enumerate()
+                    .map(|(i, (&gene_1, &gene_2))| {
+                        if visited.contains(&i) {
+                            (gene_1, gene_2)
+                        } else {
+                            (gene_2, gene_1)
+                        }
+                    })
+                    .unzip();
+                (
+                    IndividualType::Permuted(child_genes_1),
+                    IndividualType::Permuted(child_genes_2),
+                )
             }
             (IndividualType::Binary(_), IndividualType::Permuted(_)) => todo!(),
             (IndividualType::Permuted(_), IndividualType::Binary(_)) => todo!(),
@@ -105,25 +130,27 @@ impl Individual {
     pub fn new(dim: usize, individual_type: &IndividualType) -> Self {
         let mut rng = rand::thread_rng();
         let chromosome: IndividualType = match individual_type {
-            IndividualType::Binary(_) => IndividualType::Binary(
-                (0..dim).map(|_| rng.gen::<bool>()).collect(),
-            ),
-            IndividualType::Permuted(_) => todo!(),
+            IndividualType::Binary(_) => {
+                IndividualType::Binary((0..dim).map(|_| rng.gen::<bool>()).collect())
+            }
+            IndividualType::Permuted(_) => {
+                let mut genes = (0..dim).collect::<Vec<usize>>();
+                genes.shuffle(&mut rng);
+                IndividualType::Permuted(genes)
+            }
         };
         Individual { chromosome }
     }
+
     #[must_use]
     pub fn mutate(&self, mutation_chance: f64) -> Self {
         Individual {
             chromosome: self.chromosome.mutate(mutation_chance),
         }
     }
+
     #[must_use]
-    pub fn crossover(
-        &self,
-        parent_2: &Individual,
-        crossover_point: usize,
-    ) -> (Self, Self) {
+    pub fn crossover(&self, parent_2: &Individual, crossover_point: usize) -> (Self, Self) {
         let (child_1, child_2) = self
             .chromosome
             .crossover(&parent_2.chromosome, crossover_point);
@@ -145,11 +172,7 @@ pub struct Population {
 
 impl Population {
     #[must_use]
-    pub fn new(
-        qtd_individuals: usize,
-        dim: usize,
-        individual_type: &IndividualType,
-    ) -> Self {
+    pub fn new(qtd_individuals: usize, dim: usize, individual_type: &IndividualType) -> Self {
         let individuals: Vec<Individual> = (0..qtd_individuals)
             .map(|_| Individual::new(dim, individual_type))
             .collect();

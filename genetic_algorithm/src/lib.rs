@@ -1,16 +1,15 @@
+#[cfg(feature = "sequential")]
+use std::iter::once;
+
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::{Individual, IndividualType, Population};
-use loader_config::Config;
+use loader_config::{Config, PopType};
 use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
-#[cfg(features="parallel")]
-use rayon::iter::{
-    once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
-#[cfg(not(features="parallel"))]
-use std::iter::once;
+#[cfg(not(feature = "sequential"))]
+use rayon::iter::{once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 pub struct GA<'a> {
     pub config: &'a Config,
@@ -22,40 +21,22 @@ pub struct GA<'a> {
     generations_without_improvement: usize,
 }
 
-// struct IndividualTypeVecDisplay(IndividualType);
-
-// impl Display for IndividualTypeVecDisplay {
-//     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-//         let mut comma_separated = String::from("[");
-
-//         for num in &self.0[0..self.0.len() - 1] {
-//             match num {
-//                 IndividualType::Binary(value) => {
-//                     comma_separated.push_str(value.to_string().as_str());
-//                     comma_separated.push_str(", ");
-//                 }
-//                 IndividualType::Permuted(value) => {
-//                     comma_separated.push_str(value.to_string().as_str());
-//                     comma_separated.push_str(", ");
-//                 }
-//             }
-//         }
-
-//         comma_separated.push_str(self.0[self.0.len() - 1].to_string().as_str());
-//         write!(f, "{comma_separated}]")
-//     }
-// }
-
 impl<'a> GA<'a> {
     pub fn new(
         problem: &'a (dyn Problem + Sync + Send),
         config: &'a Config,
         multi_progress_bar: &'a MultiProgress,
     ) -> Self {
+        let individual_type = match config.pop_config.pop_type {
+            PopType::BINARY => IndividualType::Binary(vec![]),
+            PopType::REAL => todo!(),
+            PopType::INTEGER => todo!(),
+            PopType::PERMUTED => IndividualType::Permuted(vec![]),
+        };
         let population = Population::new(
             config.pop_config.pop_size,
             config.pop_config.dim,
-            &IndividualType::Binary(vec![]),
+            &individual_type,
         );
         GA {
             problem,
@@ -71,12 +52,11 @@ impl<'a> GA<'a> {
     fn evaluate(&self) -> Vec<(usize, f64)> {
         let population = &self.population.individuals;
 
-        #[cfg(features="parallel")]
+        #[cfg(not(feature = "sequential"))]
         let population_iter = population.par_iter();
-        #[cfg(not(features="parallel"))]
+        #[cfg(feature = "sequential")]
         let population_iter = population.iter();
 
-        
         population_iter
             .enumerate()
             .map(|(i, individual)| (i, self.problem.fitness(individual)))
@@ -96,9 +76,8 @@ impl<'a> GA<'a> {
         if let Some(current_best) = self.best_individual_value {
             if *best_individual_value >= current_best {
                 self.best_individual_value = Some(*best_individual_value);
-                self.best_individual = Some(
-                    self.population.individuals[*best_individual_index].clone(),
-                );
+                self.best_individual =
+                    Some(self.population.individuals[*best_individual_index].clone());
             } else {
                 self.generations_without_improvement += 1;
                 if self.config.elitism {
@@ -120,27 +99,29 @@ impl<'a> GA<'a> {
             }
         } else {
             self.best_individual_value = Some(*best_individual_value);
-            self.best_individual = Some(
-                self.population.individuals[*best_individual_index].clone(),
-            );
+            self.best_individual =
+                Some(self.population.individuals[*best_individual_index].clone());
         }
         new_result
     }
 
     fn genocide(&mut self) -> Vec<(usize, f64)> {
         self.generations_without_improvement = 0;
+        let individual_type = match self.config.pop_config.pop_type {
+            PopType::BINARY => IndividualType::Binary(vec![]),
+            PopType::REAL => todo!(),
+            PopType::INTEGER => todo!(),
+            PopType::PERMUTED => IndividualType::Permuted(vec![]),
+        };
         let new_population = Population::new(
             self.config.pop_config.pop_size / 2,
             self.config.pop_config.dim,
-            &IndividualType::Binary(vec![]),
+            &individual_type,
         );
         let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
         let mut sequence: RandomSequence<u16> = config.into_iter();
         (0..self.config.pop_config.pop_size / 2)
-            .map(|_| {
-                (sequence.next().unwrap() as usize)
-                    % self.config.pop_config.pop_size
-            })
+            .map(|_| (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size)
             .for_each(|index| {
                 self.population.individuals[index] = new_population.individuals
                     [index % (self.config.pop_config.pop_size / 2)]
@@ -155,8 +136,7 @@ impl<'a> GA<'a> {
         let pop_size = self.config.pop_config.pop_size;
         let kp = self.config.kp;
         let mut rng = rand::thread_rng();
-        let mut mating_pool: Vec<(usize, usize)> =
-            Vec::with_capacity(pop_size / 2);
+        let mut mating_pool: Vec<(usize, usize)> = Vec::with_capacity(pop_size / 2);
         for _ in 0..(pop_size / 2) {
             let parent1 = {
                 let p1 = rng.gen_range(0..pop_size);
@@ -192,9 +172,9 @@ impl<'a> GA<'a> {
     }
 
     fn crossover(&self, mating_pool: &[(usize, usize)]) -> Population {
-        #[cfg(features="parallel")]
+        #[cfg(not(feature = "sequential"))]
         let mating_pool_iter = mating_pool.par_iter();
-        #[cfg(not(features="parallel"))]
+        #[cfg(feature = "sequential")]
         let mating_pool_iter = mating_pool.iter();
 
         let crossover_chance = self.config.crossover_chance;
@@ -204,12 +184,8 @@ impl<'a> GA<'a> {
             let mut child1 = self.population.individuals[*parent1].clone();
             let mut child2 = self.population.individuals[*parent2].clone();
             if crossover <= crossover_chance {
-                let crossover_point =
-                    rng.gen_range(0..self.config.pop_config.dim);
-                    (child1, child2) = child1.crossover(
-                        &child2,
-                        crossover_point);
-                
+                let crossover_point = rng.gen_range(0..self.config.pop_config.dim);
+                (child1, child2) = child1.crossover(&child2, crossover_point);
             }
             (child1, child2)
         });
@@ -223,14 +199,14 @@ impl<'a> GA<'a> {
     }
 
     fn mutation(&self, new_population: &Population) -> Population {
-        #[cfg(features="parallel")]
+        #[cfg(not(feature = "sequential"))]
         let individuals_iter = new_population.individuals.par_iter();
-        #[cfg(not(features="parallel"))]
+        #[cfg(feature = "sequential")]
         let individuals_iter = new_population.individuals.iter();
 
         let mutation_chance = self.config.mutation_chance;
-        let mutated_population = individuals_iter
-            .map(|individual| individual.mutate(mutation_chance));
+        let mutated_population =
+            individuals_iter.map(|individual| individual.mutate(mutation_chance));
 
         Population {
             individuals: mutated_population.collect(),
@@ -238,13 +214,9 @@ impl<'a> GA<'a> {
     }
 
     fn log_run_result(&self) {
-        // TODO(Otavio): Best Individual Value and Best Individual Value Decoded are not the same
         match &self.best_individual {
             Some(best_individual) => {
-                info!(
-                    "Best Individual: {}",
-                    best_individual.chromosome.clone()
-                );
+                info!("Best Individual: {}", best_individual.chromosome.clone());
                 info!(
                     "Best Individual Value: {}",
                     self.best_individual_value.unwrap()
@@ -301,13 +273,12 @@ impl<'a> GA<'a> {
         for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
             let new_result = self.update_best(&result);
-            let newer_result = if self.generations_without_improvement
-                >= self.config.generations_to_genocide
-            {
-                self.genocide()
-            } else {
-                new_result
-            };
+            let newer_result =
+                if self.generations_without_improvement >= self.config.generations_to_genocide {
+                    self.genocide()
+                } else {
+                    new_result
+                };
 
             self.log_generation(generation, &newer_result);
 

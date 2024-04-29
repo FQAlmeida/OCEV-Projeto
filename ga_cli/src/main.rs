@@ -56,7 +56,10 @@ fn config_tracing(problem_name: &str) -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let options: Vec<&str> = vec!["SAT-3", "RADIO", "ALGEBRAIC-FUNCTION"];
+    #[cfg(not(feature = "sequential"))]
+    println!("Parallel feature enabled");
+
+    let options: Vec<&str> = vec!["SAT-3", "RADIO", "ALGEBRAIC-FUNCTION", "NQUEENS"];
     let problem_name_answer: Result<&str, InquireError> =
         Select::new("Which problem to run?", options).prompt();
     let problem_name = problem_name_answer.expect("Problem not found");
