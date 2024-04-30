@@ -258,6 +258,36 @@ impl<'a> GA<'a> {
         );
     }
 
+    fn linear_escalation(&self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
+        let c = 2.0;
+        let min = *result
+            .par_iter()
+            .map(|(_, value)| value)
+            .min_by(|a, b| a.total_cmp(b))
+            .unwrap();
+        let max = *result
+            .par_iter()
+            .map(|(_, value)| value)
+            .max_by(|a, b| a.total_cmp(b))
+            .unwrap();
+        let average = result.par_iter().map(|(_, value)| value).sum::<f64>() / result.len() as f64;
+        let (alpha, beta) = if min > (c * average - max) / (c - 1.0) {
+            (
+                average * (c - 1.0) / (max - average),
+                average * (max - c * average) / (max - average),
+            )
+        } else {
+            (
+                average / (average - min),
+                (-min * average) / (average - min),
+            )
+        };
+        result
+            .par_iter()
+            .map(|(index, value)| (*index, alpha * value + beta))
+            .collect()
+    }
+
     /// # Panics
     /// If I did shit
     pub fn run(&mut self) -> (Option<Individual>, Option<f64>) {
@@ -272,6 +302,7 @@ impl<'a> GA<'a> {
 
         for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
+            // let linear_escalated_result = self.linear_escalation(&result);
             let new_result = self.update_best(&result);
             let newer_result =
                 if self.generations_without_improvement >= self.config.generations_to_genocide {
