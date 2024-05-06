@@ -48,6 +48,33 @@ pub struct Config {
     pub mutation_chance: f64,
     pub constraint_penalty: f64,
     pub kp: f64,
+    pub generation_gap: f64,
+    pub linear_scaling: f64,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            pop_config: PopConfig {
+                dim: 100,
+                pop_size: 10,
+                pop_type: PopType::BINARY,
+                bounds: None,
+            },
+            qtd_gen: 100,
+            qtd_runs: 3,
+            generations_to_genocide: 250,
+            elitism: true,
+            selection_method: SelectionMethod::Tournament,
+            crossover_method: CrossOverMethod::OnePoint,
+            crossover_chance: 0.9,
+            mutation_chance: 0.03,
+            constraint_penalty: -1.0,
+            kp: 0.9,
+            generation_gap: 1.0,
+            linear_scaling: 1.2,
+        }
+    }
 }
 
 impl Config {
@@ -66,8 +93,7 @@ impl Config {
     {
         let data = fs::read_to_string(path).expect("Failed to read file");
         let config_data: Value = serde_json::from_str(&data)?;
-        let obj: Config =
-            serde_json::from_value(config_data["config"].clone())?;
+        let obj: Config = serde_json::from_value(config_data["config"].clone())?;
         Ok(obj)
     }
 }

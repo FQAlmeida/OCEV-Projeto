@@ -4,14 +4,14 @@ use loader_config::Config;
 use nqueens::NQueens;
 use problem::Problem;
 
-pub mod sat_3;
 pub mod algebraic_function;
-pub mod radio;
 pub mod nqueens;
+pub mod radio;
+pub mod sat_3;
 
-use sat_3::SAT3;
 use algebraic_function::AlgebraicFunction;
 use radio::Radio;
+use sat_3::SAT3;
 
 /// # Panics
 /// Panics if the configuration file is not found

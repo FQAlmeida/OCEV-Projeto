@@ -53,7 +53,8 @@ impl IndividualType {
                     let mutation = rng.gen::<f64>();
                     if mutation <= mutation_chance {
                         let new_gene = rng.gen_range(0..genes.len());
-                        (new_genes[i], new_genes[new_gene]) = (new_genes[new_gene], new_genes[i]);
+                        (new_genes[i], new_genes[new_gene]) =
+                            (new_genes[new_gene], new_genes[i]);
                     }
                 }
                 IndividualType::Permuted(new_genes.clone())
@@ -62,7 +63,11 @@ impl IndividualType {
     }
 
     #[must_use]
-    pub fn crossover(&self, parent_2: &IndividualType, crossover_point: usize) -> (Self, Self) {
+    pub fn crossover(
+        &self,
+        parent_2: &IndividualType,
+        crossover_point: usize,
+    ) -> (Self, Self) {
         match (self, parent_2) {
             (IndividualType::Binary(genes_1), IndividualType::Binary(genes_2)) => {
                 let genes_iter = genes_1.iter().zip(genes_2);
@@ -82,7 +87,10 @@ impl IndividualType {
                     IndividualType::Binary(child_genes_2),
                 )
             }
-            (IndividualType::Permuted(genes_1), IndividualType::Permuted(genes_2)) => {
+            (
+                IndividualType::Permuted(genes_1),
+                IndividualType::Permuted(genes_2),
+            ) => {
                 let mut visited: Vec<usize> = vec![0];
                 let mut visited_index: usize = genes_1
                     .iter()
@@ -150,7 +158,11 @@ impl Individual {
     }
 
     #[must_use]
-    pub fn crossover(&self, parent_2: &Individual, crossover_point: usize) -> (Self, Self) {
+    pub fn crossover(
+        &self,
+        parent_2: &Individual,
+        crossover_point: usize,
+    ) -> (Self, Self) {
         let (child_1, child_2) = self
             .chromosome
             .crossover(&parent_2.chromosome, crossover_point);
@@ -172,7 +184,11 @@ pub struct Population {
 
 impl Population {
     #[must_use]
-    pub fn new(qtd_individuals: usize, dim: usize, individual_type: &IndividualType) -> Self {
+    pub fn new(
+        qtd_individuals: usize,
+        dim: usize,
+        individual_type: &IndividualType,
+    ) -> Self {
         let individuals: Vec<Individual> = (0..qtd_individuals)
             .map(|_| Individual::new(dim, individual_type))
             .collect();

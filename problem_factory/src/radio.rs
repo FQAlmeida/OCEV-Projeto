@@ -60,8 +60,7 @@ impl Problem for Radio {
     fn constraint(&self, individual: &[f64]) -> f64 {
         let qtd_1 = individual[0];
         let qtd_2 = individual[1];
-        let penalty = ((qtd_1 + (2.0 * qtd_2))
-            - self.problem.qtd_employees as f64)
+        let penalty = ((qtd_1 + (2.0 * qtd_2)) - self.problem.qtd_employees as f64)
             / self.problem.max_h;
 
         let penalty_2 = f64::max(0.0, (qtd_1 - 24.0) / 8.0);

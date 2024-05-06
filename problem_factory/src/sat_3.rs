@@ -60,7 +60,6 @@ impl Problem for SAT3 {
         let clauses_neg_iter = self.clause_neg.iter();
         let clauses_satisfied_iter = self.clause_id.iter();
 
-        
         clauses_satisfied_iter
             .zip(clauses_neg_iter)
             .map(|i| {

@@ -9,7 +9,9 @@ use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
 #[cfg(not(feature = "sequential"))]
-use rayon::iter::{once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{
+    once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
+};
 
 pub struct GA<'a> {
     pub config: &'a Config,
@@ -76,8 +78,9 @@ impl<'a> GA<'a> {
         if let Some(current_best) = self.best_individual_value {
             if *best_individual_value >= current_best {
                 self.best_individual_value = Some(*best_individual_value);
-                self.best_individual =
-                    Some(self.population.individuals[*best_individual_index].clone());
+                self.best_individual = Some(
+                    self.population.individuals[*best_individual_index].clone(),
+                );
             } else {
                 self.generations_without_improvement += 1;
                 if self.config.elitism {
@@ -121,7 +124,9 @@ impl<'a> GA<'a> {
         let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
         let mut sequence: RandomSequence<u16> = config.into_iter();
         (0..self.config.pop_config.pop_size / 2)
-            .map(|_| (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size)
+            .map(|_| {
+                (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size
+            })
             .for_each(|index| {
                 self.population.individuals[index] = new_population.individuals
                     [index % (self.config.pop_config.pop_size / 2)]
@@ -258,8 +263,10 @@ impl<'a> GA<'a> {
         );
     }
 
+    // TODO(Otávio): Implement linear_escalation
+    #[allow(dead_code)]
     fn linear_escalation(&self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
-        let c = 2.0;
+        let c = self.config.linear_scaling;
         let min = *result
             .par_iter()
             .map(|(_, value)| value)
@@ -270,7 +277,8 @@ impl<'a> GA<'a> {
             .map(|(_, value)| value)
             .max_by(|a, b| a.total_cmp(b))
             .unwrap();
-        let average = result.par_iter().map(|(_, value)| value).sum::<f64>() / result.len() as f64;
+        let average = result.par_iter().map(|(_, value)| value).sum::<f64>()
+            / result.len() as f64;
         let (alpha, beta) = if min > (c * average - max) / (c - 1.0) {
             (
                 average * (c - 1.0) / (max - average),
@@ -286,6 +294,27 @@ impl<'a> GA<'a> {
             .par_iter()
             .map(|(index, value)| (*index, alpha * value + beta))
             .collect()
+    }
+
+    #[allow(dead_code)]
+    fn generation_gap(&self, new_population: &Population) -> Population {
+        let new_population_iter = new_population
+            .individuals
+            .par_iter()
+            .zip(self.population.individuals.par_iter());
+        let new_population = new_population_iter
+            .map(|(new_individual, old_individual)| {
+                let mut rng = rand::thread_rng();
+                if rng.gen::<f64>() < self.config.generation_gap {
+                    new_individual.clone()
+                } else {
+                    old_individual.clone()
+                }
+            })
+            .collect();
+        Population {
+            individuals: new_population,
+        }
     }
 
     /// # Panics
@@ -304,12 +333,13 @@ impl<'a> GA<'a> {
             let result = self.evaluate();
             // let linear_escalated_result = self.linear_escalation(&result);
             let new_result = self.update_best(&result);
-            let newer_result =
-                if self.generations_without_improvement >= self.config.generations_to_genocide {
-                    self.genocide()
-                } else {
-                    new_result
-                };
+            let newer_result = if self.generations_without_improvement
+                >= self.config.generations_to_genocide
+            {
+                self.genocide()
+            } else {
+                new_result
+            };
 
             self.log_generation(generation, &newer_result);
 
@@ -317,6 +347,7 @@ impl<'a> GA<'a> {
             let mut new_population = self.crossover(&mating_pool);
             new_population = self.mutation(&new_population);
 
+            // self.population = self.generation_gap(&new_population);
             self.population = new_population;
 
             pb.inc(1);
