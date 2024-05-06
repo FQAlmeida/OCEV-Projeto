@@ -12,8 +12,9 @@
     "crossover_chance": 0.8,
     "mutation_chance": 0.01,
     "constraint_penalty": -1.0,
-    "elitism": true,
-    "generations_to_genocide": 150,
-    "kp": 0.9
+    "elitism": false,
+    "generations_to_genocide": 5000,
+    "kp": 0.9,
+    "generation_gap": 0.8
   }
 }

@@ -265,8 +265,14 @@ impl<'a> GA<'a> {
 
     // TODO(Otávio): Implement linear_escalation
     #[allow(dead_code)]
-    fn linear_escalation(&self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
-        let c = self.config.linear_scaling;
+    fn linear_escalation(
+        &self,
+        result: &[(usize, f64)],
+        generation: usize,
+        total_generations: usize,
+    ) -> Vec<(usize, f64)> {
+        let c =
+            1.2 + (((2.0 - 1.2) / (total_generations as f64)) * (generation as f64));
         let min = *result
             .par_iter()
             .map(|(_, value)| value)
@@ -297,7 +303,15 @@ impl<'a> GA<'a> {
     }
 
     #[allow(dead_code)]
-    fn generation_gap(&self, new_population: &Population) -> Population {
+    fn generation_gap(
+        &self,
+        new_population: &Population,
+        generation: usize,
+        total_generation: usize,
+    ) -> Population {
+        let proportion = self.config.generation_gap
+            + (((1.0 - self.config.generation_gap) / total_generation as f64)
+                * generation as f64);
         let new_population_iter = new_population
             .individuals
             .par_iter()
@@ -305,7 +319,7 @@ impl<'a> GA<'a> {
         let new_population = new_population_iter
             .map(|(new_individual, old_individual)| {
                 let mut rng = rand::thread_rng();
-                if rng.gen::<f64>() < self.config.generation_gap {
+                if rng.gen::<f64>() < proportion {
                     new_individual.clone()
                 } else {
                     old_individual.clone()
@@ -331,8 +345,9 @@ impl<'a> GA<'a> {
 
         for generation in 1..=self.config.qtd_gen {
             let result = self.evaluate();
-            // let linear_escalated_result = self.linear_escalation(&result);
-            let new_result = self.update_best(&result);
+            let linear_escalated_result =
+                self.linear_escalation(&result, generation, self.config.qtd_gen);
+            let new_result = self.update_best(&linear_escalated_result);
             let newer_result = if self.generations_without_improvement
                 >= self.config.generations_to_genocide
             {
@@ -347,8 +362,11 @@ impl<'a> GA<'a> {
             let mut new_population = self.crossover(&mating_pool);
             new_population = self.mutation(&new_population);
 
-            // self.population = self.generation_gap(&new_population);
-            self.population = new_population;
+            self.population = self.generation_gap(
+                &new_population,
+                generation,
+                self.config.qtd_gen,
+            );
 
             pb.inc(1);
         }

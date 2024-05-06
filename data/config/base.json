@@ -14,6 +14,8 @@
     "constraint_penalty": -1.0,
     "elitism": false,
     "generations_to_genocide": 25,
-    "kp": 1.0
+    "kp": 1.0,
+    "generation_gap": 1.0,
+    "linear_scaling": 2.0
   }
 }

@@ -49,7 +49,6 @@ pub struct Config {
     pub constraint_penalty: f64,
     pub kp: f64,
     pub generation_gap: f64,
-    pub linear_scaling: f64,
 }
 
 impl Default for Config {
@@ -72,7 +71,6 @@ impl Default for Config {
             constraint_penalty: -1.0,
             kp: 0.9,
             generation_gap: 1.0,
-            linear_scaling: 1.2,
         }
     }
 }
