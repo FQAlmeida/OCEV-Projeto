@@ -21,6 +21,7 @@ pub struct GA<'a> {
     pub best_individual_value: Option<f64>,
     multi_progress_bar: &'a MultiProgress,
     generations_without_improvement: usize,
+    generation: usize,
 }
 
 impl<'a> GA<'a> {
@@ -48,6 +49,7 @@ impl<'a> GA<'a> {
             best_individual: None,
             best_individual_value: None,
             generations_without_improvement: 0,
+            generation: 0,
         }
     }
 
@@ -67,17 +69,19 @@ impl<'a> GA<'a> {
 
     fn update_best(&mut self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
         let mut new_result = result.to_vec();
-        let (best_individual_index, best_individual_value) = result
+        let (best_individual_index, best_individual_value_scaled) = new_result
             .iter()
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .unwrap();
-        let (worst_individual_index, _) = result
+        let (worst_individual_index, _) = new_result
             .iter()
             .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .unwrap();
+        let best_individual_value = *best_individual_value_scaled;
         if let Some(current_best) = self.best_individual_value {
-            if *best_individual_value >= current_best {
-                self.best_individual_value = Some(*best_individual_value);
+            if best_individual_value >= current_best {
+                self.generations_without_improvement = 0;
+                self.best_individual_value = Some(best_individual_value);
                 self.best_individual = Some(
                     self.population.individuals[*best_individual_index].clone(),
                 );
@@ -101,7 +105,7 @@ impl<'a> GA<'a> {
                 }
             }
         } else {
-            self.best_individual_value = Some(*best_individual_value);
+            self.best_individual_value = Some(best_individual_value);
             self.best_individual =
                 Some(self.population.individuals[*best_individual_index].clone());
         }
@@ -245,7 +249,8 @@ impl<'a> GA<'a> {
         };
     }
 
-    fn log_generation(&self, generation: usize, result: &[(usize, f64)]) {
+    fn log_generation(&self, result: &[(usize, f64)]) {
+        let generation = self.generation;
         let result_mapped = result.iter().map(|(_, value)| value);
         info!(
             "State Individual: {} {} {} {} {}",
@@ -265,14 +270,14 @@ impl<'a> GA<'a> {
 
     // TODO(Otávio): Implement linear_escalation
     #[allow(dead_code)]
-    fn linear_escalation(
-        &self,
-        result: &[(usize, f64)],
-        generation: usize,
-        total_generations: usize,
-    ) -> Vec<(usize, f64)> {
-        let c =
-            1.2 + (((2.0 - 1.2) / (total_generations as f64)) * (generation as f64));
+    fn linear_escalation(&self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
+        let generation: f64 = self.generation as f64;
+        let total_generations: f64 = self.config.qtd_gen as f64;
+        let c = if generation < total_generations * 0.8 {
+            1.2 + (((2.0 - 1.2) / (total_generations * 0.8)) * (generation))
+        } else {
+            2.0
+        };
         let min = *result
             .par_iter()
             .map(|(_, value)| value)
@@ -303,15 +308,17 @@ impl<'a> GA<'a> {
     }
 
     #[allow(dead_code)]
-    fn generation_gap(
-        &self,
-        new_population: &Population,
-        generation: usize,
-        total_generation: usize,
-    ) -> Population {
-        let proportion = self.config.generation_gap
-            + (((1.0 - self.config.generation_gap) / total_generation as f64)
-                * generation as f64);
+    fn generation_gap(&self, new_population: &Population) -> Population {
+        let generation: f64 = self.generation as f64;
+        let total_generations: f64 = self.config.qtd_gen as f64;
+
+        let proportion = if generation < total_generations * 0.8 {
+            self.config.generation_gap
+                + (((1.0 - self.config.generation_gap) / total_generations)
+                    * generation)
+        } else {
+            1.0
+        };
         let new_population_iter = new_population
             .individuals
             .par_iter()
@@ -331,6 +338,17 @@ impl<'a> GA<'a> {
         }
     }
 
+    fn check_genocide(&mut self, new_result: &[(usize, f64)]) -> Vec<(usize, f64)> {
+        let newer_result = if self.generations_without_improvement
+            >= self.config.generations_to_genocide
+        {
+            self.genocide()
+        } else {
+            new_result.to_vec()
+        };
+        newer_result
+    }
+
     /// # Panics
     /// If I did shit
     pub fn run(&mut self) -> (Option<Individual>, Option<f64>) {
@@ -344,29 +362,18 @@ impl<'a> GA<'a> {
         pb.set_style(sty);
 
         for generation in 1..=self.config.qtd_gen {
+            self.generation = generation;
             let result = self.evaluate();
-            let linear_escalated_result =
-                self.linear_escalation(&result, generation, self.config.qtd_gen);
-            let new_result = self.update_best(&linear_escalated_result);
-            let newer_result = if self.generations_without_improvement
-                >= self.config.generations_to_genocide
-            {
-                self.genocide()
-            } else {
-                new_result
-            };
+            let new_result = self.update_best(&result);
+            let newer_result = self.check_genocide(&new_result);
 
-            self.log_generation(generation, &newer_result);
-
-            let mating_pool = self.selection(&newer_result);
+            self.log_generation(&newer_result);
+            let scaled_result = self.linear_escalation(&new_result);
+            let mating_pool = self.selection(&scaled_result);
             let mut new_population = self.crossover(&mating_pool);
             new_population = self.mutation(&new_population);
 
-            self.population = self.generation_gap(
-                &new_population,
-                generation,
-                self.config.qtd_gen,
-            );
+            self.population = self.generation_gap(&new_population);
 
             pb.inc(1);
         }

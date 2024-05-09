@@ -99,7 +99,7 @@ for i, d in enumerate(convergency):
             data_frame=d.to_pandas(),
             x="generation",
             y=["best_all", "best_pop", "mean", "worst"],
+            labels={"value": "Fitness", "generation": "Generation"},
         ),
         use_container_width=True,
     )
-

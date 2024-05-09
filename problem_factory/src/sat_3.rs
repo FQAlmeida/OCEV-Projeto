@@ -41,7 +41,7 @@ impl Problem for SAT3 {
     }
 
     fn normed_objective(&self, individual: &[f64]) -> f64 {
-        self.objective(individual)
+        self.objective(individual) / 430.0
     }
 
     fn constraint(&self, _: &[f64]) -> f64 {
