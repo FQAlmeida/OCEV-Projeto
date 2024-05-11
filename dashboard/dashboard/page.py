@@ -7,9 +7,8 @@ from pathlib import Path
 import plotly.express as px
 import polars as pl
 import streamlit as st
-from read_log_file import read_log_file
 from problems_repr_plotter import problems_dict
-
+from read_log_file import read_log_file
 
 st.set_page_config(st.session_state.get("title", "Resultados"), "🧬", "wide")
 
@@ -42,10 +41,10 @@ def get_data(current_file: Path):
     convergency = [
         pl.DataFrame({
             "generation": [i.generation for i in d.generations],
-            "best_all": [i.best_all for i in d.generations],
-            "best_pop": [i.best_pop for i in d.generations],
-            "mean": [i.mean for i in d.generations],
-            "worst": [i.worst for i in d.generations],
+            "Best of All": [i.best_all for i in d.generations],
+            "Population's Best": [i.best_pop for i in d.generations],
+            "Population's Mean": [i.mean for i in d.generations],
+            "Population's Worst": [i.worst for i in d.generations],
         })
         for d in data
     ]
@@ -98,7 +97,12 @@ for i, d in enumerate(convergency):
         px.line(
             data_frame=d.to_pandas(),
             x="generation",
-            y=["best_all", "best_pop", "mean", "worst"],
+            y=[
+                "Best of All",
+                "Population's Best",
+                "Population's Mean",
+                "Population's Worst",
+            ],
             labels={"value": "Fitness", "generation": "Generation"},
         ),
         use_container_width=True,

@@ -42,9 +42,7 @@ impl Problem for NQueens {
     }
 
     fn normed_objective(&self, individual: &[f64]) -> f64 {
-        1.0 - (self.objective(individual)
-            / ((self.problem.board_size * (self.problem.board_size - 1)) as f64
-                / 2.0))
+        1.0 - (self.objective(individual) / (self.problem.board_size - 1) as f64)
     }
 
     fn constraint(&self, _: &[f64]) -> f64 {
@@ -60,29 +58,30 @@ impl Problem for NQueens {
     }
 
     fn objective(&self, individual: &[f64]) -> f64 {
-        let mut collisions = 0;
-        for line in 0..self.problem.board_size {
-            let queen_col = individual[line] as usize;
-            for (next_line, &next_queen) in individual[line + 1..].iter().enumerate()
-            {
-                let next_queen_col = next_queen as usize;
-                if queen_col + (next_line + 1) >= self.problem.board_size
-                    && queen_col < (next_line + 1)
+        let collisions: usize = individual[0..individual.len() - 1]
+            .iter()
+            .enumerate()
+            .map(|(line, &queen)| {
+                let queen_col = queen as usize;
+                for (next_line, &next_queen) in individual[line+1..].iter().enumerate()
                 {
-                    break;
+                    let offset = next_line + 1;
+                    if queen_col + offset >= self.problem.board_size
+                        && queen_col < offset
+                    {
+                        return 0;
+                    }
+                    let next_queen_col = next_queen as usize;
+                    if (queen_col >= offset && next_queen_col == queen_col - offset)
+                        || (queen_col + offset < self.problem.board_size
+                            && next_queen_col == queen_col + offset)
+                    {
+                        return 1;
+                    }
                 }
-                if queen_col + (next_line + 1) < self.problem.board_size
-                    && next_queen_col == queen_col + (next_line + 1)
-                {
-                    collisions += 1;
-                }
-                if queen_col >= (next_line + 1)
-                    && next_queen_col == queen_col - (next_line + 1)
-                {
-                    collisions += 1;
-                }
-            }
-        }
+                return 0;
+            })
+            .sum();
         collisions as f64
     }
 

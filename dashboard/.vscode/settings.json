@@ -8,7 +8,14 @@
         "plotly",
         "prcs",
         "selectbox",
-        "streamlit"
+        "streamlit",
+        "vmax",
+        "vmin",
+        "whitegrid",
+        "xlabel",
+        "ylabel",
+        "zmax",
+        "zmin"
     ],
     "cSpell.language": "en,pt"
 }
