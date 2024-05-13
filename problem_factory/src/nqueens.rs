@@ -4,9 +4,10 @@ use std::{
     path::Path,
 };
 
-use individual_creation::{Individual, IndividualType};
 use loader_config::Config;
-use problem::Problem;
+use population::{Individual, IndividualType};
+
+use crate::Problem;
 
 // #[cfg(not(feature = "sequential"))]
 // use rayon::prelude::*;

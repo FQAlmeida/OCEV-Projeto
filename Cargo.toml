@@ -2,9 +2,8 @@
 members = [
     "genetic_algorithm", 
     "genetic_framework", 
-    "individual_creation", 
+    "population", 
     "loader_config", 
-    "problem", 
     "loader_config", 
     "problem_factory", 
     "ga_cli", 

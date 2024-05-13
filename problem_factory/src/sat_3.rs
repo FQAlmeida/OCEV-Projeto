@@ -4,9 +4,9 @@ use std::{
     path::Path,
 };
 
-use individual_creation::{Individual, IndividualType};
+use population::{Individual, IndividualType};
 use loader_config::Config;
-use problem::Problem;
+use crate::Problem;
 
 pub struct SAT3 {
     config: Config,

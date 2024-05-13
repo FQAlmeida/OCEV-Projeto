@@ -5,17 +5,17 @@
       "pop_size": 50,
       "pop_type": "Binary"
     },
-    "qtd_gen": 2500,
-    "qtd_runs": 3,
+    "qtd_gen": 5000,
+    "qtd_runs": 5,
     "selection_method": "Roulette",
     "crossover_method": "OnePoint",
-    "crossover_chance": 0.8,
-    "mutation_chance": 0.02,
+    "crossover_chance": 0.95,
+    "mutation_chance": 0.0015,
     "constraint_penalty": -1.0,
     "elitism": true,
-    "generations_to_genocide": 150,
-    "kp": 0.8,
-    "generation_gap": 1.0,
+    "generations_to_genocide": 5000,
+    "kp": 0.95,
+    "generation_gap": 0.0,
     "linear_scaling": 2.0
   }
 }

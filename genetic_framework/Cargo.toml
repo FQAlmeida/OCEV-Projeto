@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 genetic_algorithm = {path = "../genetic_algorithm"}
-problem = {path = "../problem"}
+problem_factory = {path = "../problem_factory"}
 loader_config = {path = "../loader_config"}
-individual_creation = {path = "../individual_creation"}
+population = {path = "../population"}
 indicatif = {version = "0.17.8"}
 log = {version = "0.4.21"}
 serde = {version = "1.0.198"}

@@ -1,9 +1,9 @@
 use genetic_algorithm::GA;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use individual_creation::Individual;
+use population::Individual;
 use loader_config::Config;
 use log::info;
-use problem::Problem;
+use problem_factory::problem::Problem;
 
 pub struct Framework {
     problem: Box<dyn Problem + Send + Sync>,

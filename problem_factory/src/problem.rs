@@ -1,5 +1,5 @@
-use individual_creation::Individual;
 use loader_config::Config;
+use population::Individual;
 
 pub trait Problem {
     fn get_name(&self) -> String;

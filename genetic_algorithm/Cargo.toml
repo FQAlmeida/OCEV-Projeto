@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-individual_creation = {path = "../individual_creation"}
+population = {path = "../population"}
 loader_config = {path="../loader_config"}
-problem = {path="../problem"}
+problem_factory = {path = "../problem_factory"}
 rayon = { version = "1.10.0"}
 rand = { version = "0.8.5"}
 indicatif = {version = "0.17.8"}

@@ -2,7 +2,8 @@ use std::path::Path;
 
 use loader_config::Config;
 use nqueens::NQueens;
-use problem::Problem;
+
+pub mod problem;
 
 pub mod algebraic_function;
 pub mod nqueens;
@@ -10,6 +11,7 @@ pub mod radio;
 pub mod sat_3;
 
 use algebraic_function::AlgebraicFunction;
+use problem::Problem;
 use radio::Radio;
 use sat_3::SAT3;
 

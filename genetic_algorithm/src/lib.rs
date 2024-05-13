@@ -4,10 +4,11 @@ use std::iter::once;
 mod selection;
 
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use individual_creation::{Individual, IndividualType, Population};
+use population::{Individual, IndividualType, Population};
 use loader_config::{Config, PopType};
 use log::info;
-use problem::Problem;
+use problem_factory::problem::Problem;
+
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
 #[cfg(not(feature = "sequential"))]
