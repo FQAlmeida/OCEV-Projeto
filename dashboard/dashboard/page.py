@@ -82,7 +82,7 @@ for i, d in enumerate(convergency):
             "Best": pprint.pformat(problem_data.runs[i].best_individual),
             "Best Value Human-Readable": problem_data.runs[i].best,
             "Best Value": problem_data.runs[i].best_normed,
-            "Has_Constraint": problem_data.runs[i].constraint != 0,
+            "Has Constraint": problem_data.runs[i].constraint != 0,
             "Constraint": problem_data.runs[i].constraint,
         }),
         use_container_width=True,

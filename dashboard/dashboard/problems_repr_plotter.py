@@ -11,11 +11,11 @@ def nqueen_plotter(solution: list[int | float]):
     for i, queen in enumerate(solution[:-1]):
         for j, next_queen in enumerate(solution[i + 1 :]):
             offset = j + 1
-            if queen < offset or queen + offset >= board_size:
-                continue
+            if queen < offset and queen + offset >= board_size:
+                break
             if next_queen in {queen - offset, queen + offset}:
                 board[i][int(queen)] = -1
-                board[j][int(next_queen)] = -1
+                board[j+i+1][int(next_queen)] = -1
     my_color_scale = ["red", "white", "black"]
     return px.imshow(
         board,

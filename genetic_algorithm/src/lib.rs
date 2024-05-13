@@ -8,6 +8,8 @@ use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
+use random_choice::random_choice;
+use rayon::iter::IntoParallelIterator;
 #[cfg(not(feature = "sequential"))]
 use rayon::iter::{
     once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
@@ -180,6 +182,47 @@ impl<'a> GA<'a> {
         mating_pool
     }
 
+    #[allow(dead_code)]
+    fn roulette(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)> {
+        let pop_size = self.config.pop_config.pop_size;
+        let result_size = result.len() as f64;
+        let mut rng_choice = random_choice();
+        let general_probabilities = result
+            .par_iter()
+            .map(|(_, r)| (*r) / result_size)
+            .collect::<Vec<f64>>();
+        let pop_index: Vec<usize> = result.par_iter().map(|(i, _)| *i).collect();
+        let parents_1 = rng_choice.random_choice_f64(
+            &pop_index,
+            &general_probabilities,
+            pop_size / 2,
+        );
+        let mating_pool: Vec<(usize, usize)> = parents_1
+            .par_iter()
+            .map(|&parent_1| {
+                let mut rng_choice_clone = random_choice();
+                let probabilities = result
+                    .iter()
+                    .filter(|(i, _)| *i != *parent_1)
+                    .map(|(_, r)| (*r) / result_size)
+                    .collect::<Vec<f64>>();
+                let choices: Vec<usize> = pop_index
+                    .iter()
+                    .filter(|&i| *i != *parent_1)
+                    .map(|i| *i)
+                    .collect();
+                let parent_2: Vec<usize> = rng_choice_clone
+                    .random_choice_f64(&choices, &probabilities, 1)
+                    .iter()
+                    .map(|&i| *i)
+                    .collect();
+                (*parent_1, *parent_2.first().expect("parent 2 is empty"))
+            })
+            .collect();
+
+        return mating_pool;
+    }
+
     fn crossover(&self, mating_pool: &[(usize, usize)]) -> Population {
         #[cfg(not(feature = "sequential"))]
         let mating_pool_iter = mating_pool.par_iter();
@@ -268,8 +311,6 @@ impl<'a> GA<'a> {
         );
     }
 
-    // TODO(Otávio): Implement linear_escalation
-    #[allow(dead_code)]
     fn linear_escalation(&self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
         let generation: f64 = self.generation as f64;
         let total_generations: f64 = self.config.qtd_gen as f64;
@@ -307,14 +348,13 @@ impl<'a> GA<'a> {
             .collect()
     }
 
-    #[allow(dead_code)]
     fn generation_gap(&self, new_population: &Population) -> Population {
         let generation: f64 = self.generation as f64;
         let total_generations: f64 = self.config.qtd_gen as f64;
 
         let proportion = if generation < total_generations * 0.8 {
             self.config.generation_gap
-                + (((1.0 - self.config.generation_gap) / total_generations)
+                + (((1.0 - self.config.generation_gap) / total_generations * 0.8)
                     * generation)
         } else {
             1.0
