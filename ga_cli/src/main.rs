@@ -21,7 +21,7 @@ fn format_path(path: ListOption<&String>) -> String {
         .to_string()
 }
 
-fn config_tracing(problem_name: &str) -> Result<()> {
+fn config_tracing(problem_name: &str) {
     let file_path = format!(
         "data/outputs/{}-{}.log",
         problem_name,
@@ -50,12 +50,10 @@ fn config_tracing(problem_name: &str) -> Result<()> {
     // This means you can change the default log level to trace
     // if you are trying to debug an issue and need more logs on then turn it off
     // once you are done.
-    let _handle = log4rs::init_config(config)?;
-    Ok(())
+    log4rs::init_config(config).expect("Unable to start log4rs config");
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() {
     #[cfg(not(feature = "sequential"))]
     println!("Parallel feature enabled");
 
@@ -63,7 +61,7 @@ async fn main() -> Result<()> {
     let problem_name_answer: Result<&str, InquireError> =
         Select::new("Which problem to run?", options).prompt();
     let problem_name = problem_name_answer.expect("Problem not found");
-    config_tracing(problem_name)?;
+    config_tracing(problem_name);
 
     let instances_options: Vec<String> =
         fs::read_dir(format!("data/instances/{}", problem_name.to_lowercase()))
@@ -111,6 +109,4 @@ async fn main() -> Result<()> {
         problem_factory::problem_factory(problem_name, &instance, &config_path);
     let ga_framework = Framework::new(problem, config);
     println!("{:?}", ga_framework.run());
-
-    Ok(())
 }

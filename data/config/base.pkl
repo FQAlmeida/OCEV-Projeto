@@ -1,7 +1,7 @@
 module ConfigTemplate
 
 typealias PopType = "int" | "permint" | "real" | "binary"
-typealias SelectionMethod = "roulette" | "tournament"
+typealias SelectionMethod = "roulette" | ""
 typealias CrossOverMethod = "one-point"
 
 class BoundConfig {

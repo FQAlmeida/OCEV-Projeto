@@ -1,3 +1,5 @@
+mod crossover;
+
 use std::fmt::Display;
 
 use rand::{prelude::SliceRandom, Rng};
@@ -16,15 +18,6 @@ impl Display for IndividualType {
         }
     }
 }
-
-// impl From<IndividualType> for Vec<bool> {
-//     fn from(val: IndividualType) -> Self {
-//         match val {
-//             IndividualType::Binary(value) => value,
-//             IndividualType::Permuted(value) => value.iter().map(|&v| v != 0).collect(),
-//         }
-//     }
-// }
 
 impl IndividualType {
     #[must_use]

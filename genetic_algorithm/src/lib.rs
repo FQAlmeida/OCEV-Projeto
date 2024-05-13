@@ -1,6 +1,8 @@
 #[cfg(feature = "sequential")]
 use std::iter::once;
 
+mod selection;
+
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use individual_creation::{Individual, IndividualType, Population};
 use loader_config::{Config, PopType};
@@ -8,12 +10,11 @@ use log::info;
 use problem::Problem;
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
-use random_choice::random_choice;
-use rayon::iter::IntoParallelIterator;
 #[cfg(not(feature = "sequential"))]
 use rayon::iter::{
     once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
+use selection::{RouletteWheel, Selection, Tournament};
 
 pub struct GA<'a> {
     pub config: &'a Config,
@@ -24,6 +25,7 @@ pub struct GA<'a> {
     multi_progress_bar: &'a MultiProgress,
     generations_without_improvement: usize,
     generation: usize,
+    selection_method: Box<dyn selection::Selection + Sync + Send>,
 }
 
 impl<'a> GA<'a> {
@@ -33,16 +35,25 @@ impl<'a> GA<'a> {
         multi_progress_bar: &'a MultiProgress,
     ) -> Self {
         let individual_type = match config.pop_config.pop_type {
-            PopType::BINARY => IndividualType::Binary(vec![]),
-            PopType::REAL => todo!(),
-            PopType::INTEGER => todo!(),
-            PopType::PERMUTED => IndividualType::Permuted(vec![]),
+            PopType::Binary => IndividualType::Binary(vec![]),
+            PopType::Real => todo!(),
+            PopType::Integer => todo!(),
+            PopType::Permuted => IndividualType::Permuted(vec![]),
         };
         let population = Population::new(
             config.pop_config.pop_size,
             config.pop_config.dim,
             &individual_type,
         );
+        let selection_method: Box<dyn Selection + Sync + Send> =
+            match config.selection_method {
+                loader_config::SelectionMethod::Roulette => {
+                    Box::new(RouletteWheel::new())
+                }
+                loader_config::SelectionMethod::Tournament => {
+                    Box::new(Tournament::new(config.kp))
+                }
+            };
         GA {
             problem,
             config,
@@ -52,6 +63,7 @@ impl<'a> GA<'a> {
             best_individual_value: None,
             generations_without_improvement: 0,
             generation: 0,
+            selection_method,
         }
     }
 
@@ -117,10 +129,10 @@ impl<'a> GA<'a> {
     fn genocide(&mut self) -> Vec<(usize, f64)> {
         self.generations_without_improvement = 0;
         let individual_type = match self.config.pop_config.pop_type {
-            PopType::BINARY => IndividualType::Binary(vec![]),
-            PopType::REAL => todo!(),
-            PopType::INTEGER => todo!(),
-            PopType::PERMUTED => IndividualType::Permuted(vec![]),
+            PopType::Binary => IndividualType::Binary(vec![]),
+            PopType::Real => todo!(),
+            PopType::Integer => todo!(),
+            PopType::Permuted => IndividualType::Permuted(vec![]),
         };
         let new_population = Population::new(
             self.config.pop_config.pop_size / 2,
@@ -144,83 +156,7 @@ impl<'a> GA<'a> {
     }
 
     fn selection(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)> {
-        let pop_size = self.config.pop_config.pop_size;
-        let kp = self.config.kp;
-        let mut rng = rand::thread_rng();
-        let mut mating_pool: Vec<(usize, usize)> = Vec::with_capacity(pop_size / 2);
-        for _ in 0..(pop_size / 2) {
-            let parent1 = {
-                let p1 = rng.gen_range(0..pop_size);
-                let p2 = rng.gen_range(0..pop_size);
-                let cmp_func = if rng.gen::<f64>() > kp {
-                    |a: f64, b: f64| a < b
-                } else {
-                    |a: f64, b: f64| a > b
-                };
-                if cmp_func(result[p1].1, result[p2].1) {
-                    p1
-                } else {
-                    p2
-                }
-            };
-            let parent2 = {
-                let p1 = rng.gen_range(0..pop_size);
-                let p2 = rng.gen_range(0..pop_size);
-                let cmp_func = if rng.gen::<f64>() > kp {
-                    |a: f64, b: f64| a < b
-                } else {
-                    |a: f64, b: f64| a > b
-                };
-                if cmp_func(result[p1].1, result[p2].1) {
-                    p1
-                } else {
-                    p2
-                }
-            };
-            mating_pool.push((parent1, parent2));
-        }
-        mating_pool
-    }
-
-    #[allow(dead_code)]
-    fn roulette(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)> {
-        let pop_size = self.config.pop_config.pop_size;
-        let result_size = result.len() as f64;
-        let mut rng_choice = random_choice();
-        let general_probabilities = result
-            .par_iter()
-            .map(|(_, r)| (*r) / result_size)
-            .collect::<Vec<f64>>();
-        let pop_index: Vec<usize> = result.par_iter().map(|(i, _)| *i).collect();
-        let parents_1 = rng_choice.random_choice_f64(
-            &pop_index,
-            &general_probabilities,
-            pop_size / 2,
-        );
-        let mating_pool: Vec<(usize, usize)> = parents_1
-            .par_iter()
-            .map(|&parent_1| {
-                let mut rng_choice_clone = random_choice();
-                let probabilities = result
-                    .iter()
-                    .filter(|(i, _)| *i != *parent_1)
-                    .map(|(_, r)| (*r) / result_size)
-                    .collect::<Vec<f64>>();
-                let choices: Vec<usize> = pop_index
-                    .iter()
-                    .filter(|&i| *i != *parent_1)
-                    .map(|i| *i)
-                    .collect();
-                let parent_2: Vec<usize> = rng_choice_clone
-                    .random_choice_f64(&choices, &probabilities, 1)
-                    .iter()
-                    .map(|&i| *i)
-                    .collect();
-                (*parent_1, *parent_2.first().expect("parent 2 is empty"))
-            })
-            .collect();
-
-        return mating_pool;
+        self.selection_method.select(result)
     }
 
     fn crossover(&self, mating_pool: &[(usize, usize)]) -> Population {
@@ -379,14 +315,13 @@ impl<'a> GA<'a> {
     }
 
     fn check_genocide(&mut self, new_result: &[(usize, f64)]) -> Vec<(usize, f64)> {
-        let newer_result = if self.generations_without_improvement
+        if self.generations_without_improvement
             >= self.config.generations_to_genocide
         {
             self.genocide()
         } else {
             new_result.to_vec()
-        };
-        newer_result
+        }
     }
 
     /// # Panics

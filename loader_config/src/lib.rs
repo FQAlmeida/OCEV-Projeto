@@ -6,10 +6,10 @@ use serde_json::Value;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum PopType {
-    BINARY,
-    REAL,
-    INTEGER,
-    PERMUTED,
+    Binary,
+    Real,
+    Integer,
+    Permuted,
 }
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum SelectionMethod {
@@ -20,6 +20,10 @@ pub enum SelectionMethod {
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum CrossOverMethod {
     OnePoint,
+    TwoPoints,
+    Uniform,
+    Cycle,
+    Permuted,
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -57,7 +61,7 @@ impl Default for Config {
             pop_config: PopConfig {
                 dim: 100,
                 pop_size: 10,
-                pop_type: PopType::BINARY,
+                pop_type: PopType::Binary,
                 bounds: None,
             },
             qtd_gen: 100,

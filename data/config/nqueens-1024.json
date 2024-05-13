@@ -2,19 +2,19 @@
   "config": {
     "pop_config": {
       "dim": 1024,
-      "pop_size": 76,
-      "pop_type": "PERMUTED"
+      "pop_size": 50,
+      "pop_type": "Permuted"
     },
-    "qtd_gen": 50000,
+    "qtd_gen": 10000,
     "qtd_runs": 3,
-    "selection_method": "Tournament",
+    "selection_method": "Roulette",
     "crossover_method": "OnePoint",
-    "crossover_chance": 0.975,
-    "mutation_chance": 0.0005,
+    "crossover_chance": 0.95,
+    "mutation_chance": 0.001,
     "constraint_penalty": -1.0,
     "elitism": true,
     "generations_to_genocide": 20000,
-    "kp": 0.975,
-    "generation_gap": 0.5
+    "kp": 0.95,
+    "generation_gap": 0.2
   }
 }

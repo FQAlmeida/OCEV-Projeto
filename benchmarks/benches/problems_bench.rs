@@ -70,7 +70,7 @@ fn create_sat_configs() -> Vec<(String, Vec<Config>)> {
             let pop_config = PopConfig {
                 dim: 100,
                 pop_size: 30 + (50 * pop_i),
-                pop_type: PopType::BINARY,
+                pop_type: PopType::Binary,
                 bounds: None,
             };
             let mut config = Config::default();
@@ -96,7 +96,7 @@ fn create_algebraic_configs() -> Vec<(String, Vec<Config>)> {
             let pop_config = PopConfig {
                 dim: 16,
                 pop_size: 10 + (pop_i * 30),
-                pop_type: PopType::BINARY,
+                pop_type: PopType::Binary,
                 bounds: None,
             };
             let mut config = Config::default();
@@ -122,7 +122,7 @@ fn create_radio_configs() -> Vec<(String, Vec<Config>)> {
             let pop_config = PopConfig {
                 dim: 10,
                 pop_size: 10 + (pop_i * 30),
-                pop_type: PopType::BINARY,
+                pop_type: PopType::Binary,
                 bounds: None,
             };
             let mut config = Config::default();

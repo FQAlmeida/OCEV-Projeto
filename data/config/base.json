@@ -3,7 +3,7 @@
     "pop_config": {
       "dim": 100,
       "pop_size": 30,
-      "pop_type": "BINARY"
+      "pop_type": "Binary"
     },
     "qtd_gen": 1,
     "qtd_runs": 1,

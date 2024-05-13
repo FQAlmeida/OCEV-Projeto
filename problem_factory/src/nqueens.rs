@@ -63,7 +63,8 @@ impl Problem for NQueens {
             .enumerate()
             .map(|(line, &queen)| {
                 let queen_col = queen as usize;
-                for (next_line, &next_queen) in individual[line+1..].iter().enumerate()
+                for (next_line, &next_queen) in
+                    individual[line + 1..].iter().enumerate()
                 {
                     let offset = next_line + 1;
                     if queen_col + offset >= self.problem.board_size
@@ -79,7 +80,7 @@ impl Problem for NQueens {
                         return 1;
                     }
                 }
-                return 0;
+                0
             })
             .sum();
         collisions as f64

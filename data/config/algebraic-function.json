@@ -3,11 +3,11 @@
     "pop_config": {
       "dim": 16,
       "pop_size": 30,
-      "pop_type": "BINARY"
+      "pop_type": "Binary"
     },
     "qtd_gen": 150,
     "qtd_runs": 50,
-    "selection_method": "Tournament",
+    "selection_method": "Roulette",
     "crossover_method": "OnePoint",
     "crossover_chance": 0.9,
     "mutation_chance": 0.02,
