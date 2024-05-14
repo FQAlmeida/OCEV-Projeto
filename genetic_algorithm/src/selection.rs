@@ -1,6 +1,6 @@
 use rand::Rng;
 use random_choice::random_choice;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
 
 pub trait Selection {
     fn select(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)>;
@@ -20,39 +20,41 @@ impl Selection for Tournament {
     fn select(&self, result: &[(usize, f64)]) -> Vec<(usize, usize)> {
         let pop_size = result.len();
         let kp = self.kp;
-        let mut rng = rand::thread_rng();
-        let mut mating_pool: Vec<(usize, usize)> = Vec::with_capacity(pop_size / 2);
-        for _ in 0..(pop_size / 2) {
-            let parent1 = {
-                let p1 = rng.gen_range(0..pop_size);
-                let p2 = rng.gen_range(0..pop_size);
-                let cmp_func = if rng.gen::<f64>() > kp {
-                    |a: f64, b: f64| a < b
-                } else {
-                    |a: f64, b: f64| a > b
+        let mating_pool: Vec<(usize, usize)> = (0..pop_size / 2)
+            .par_bridge()
+            .map(|_| {
+                let mut rng = rand::thread_rng();
+                let parent1 = {
+                    let p1 = rng.gen_range(0..pop_size);
+                    let p2 = rng.gen_range(0..pop_size);
+                    let cmp_func = if rng.gen::<f64>() > kp {
+                        |a: f64, b: f64| a < b
+                    } else {
+                        |a: f64, b: f64| a > b
+                    };
+                    if cmp_func(result[p1].1, result[p2].1) {
+                        p1
+                    } else {
+                        p2
+                    }
                 };
-                if cmp_func(result[p1].1, result[p2].1) {
-                    p1
-                } else {
-                    p2
-                }
-            };
-            let parent2 = {
-                let p1 = rng.gen_range(0..pop_size);
-                let p2 = rng.gen_range(0..pop_size);
-                let cmp_func = if rng.gen::<f64>() > kp {
-                    |a: f64, b: f64| a < b
-                } else {
-                    |a: f64, b: f64| a > b
+                let parent2 = {
+                    let p1 = rng.gen_range(0..pop_size);
+                    let p2 = rng.gen_range(0..pop_size);
+                    let cmp_func = if rng.gen::<f64>() > kp {
+                        |a: f64, b: f64| a < b
+                    } else {
+                        |a: f64, b: f64| a > b
+                    };
+                    if cmp_func(result[p1].1, result[p2].1) {
+                        p1
+                    } else {
+                        p2
+                    }
                 };
-                if cmp_func(result[p1].1, result[p2].1) {
-                    p1
-                } else {
-                    p2
-                }
-            };
-            mating_pool.push((parent1, parent2));
-        }
+                (parent1, parent2)
+            })
+            .collect();
         mating_pool
     }
 }
@@ -99,7 +101,7 @@ impl Selection for RouletteWheel {
                     .iter()
                     .map(|&i| *i)
                     .collect();
-                (*parent_1, *parent_2.first().expect("parent 2 is empty"))
+                (*parent_1, *parent_2.first().expect("Parent 2 is empty"))
             })
             .collect();
 

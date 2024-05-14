@@ -8,8 +8,7 @@ use loader_config::{Config, PopType};
 use log::info;
 use population::{Individual, IndividualType, Population};
 use problem_factory::problem::Problem;
-use rand::{rngs::OsRng, Rng};
-use rand_unique::{RandomSequence, RandomSequenceBuilder};
+use rand::{seq::SliceRandom, thread_rng, Rng};
 #[cfg(not(feature = "sequential"))]
 use rayon::iter::{
     once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
@@ -84,13 +83,13 @@ impl<'a> GA<'a> {
     fn update_best(&mut self, result: &[(usize, f64)]) -> Vec<(usize, f64)> {
         let mut new_result = result.to_vec();
         let (best_individual_index, best_individual_value_scaled) = new_result
-            .iter()
+            .par_iter()
             .max_by(|(_, a), (_, b)| {
                 a.partial_cmp(b).expect("Failed to compare values.")
             })
             .expect("Failed to get best individual.");
         let (worst_individual_index, _) = new_result
-            .iter()
+            .par_iter()
             .min_by(|(_, a), (_, b)| {
                 a.partial_cmp(b).expect("Failed to compare values.")
             })
@@ -117,7 +116,9 @@ impl<'a> GA<'a> {
                             if tuple.0 == *worst_individual_index {
                                 return (
                                     *worst_individual_index,
-                                    self.best_individual_value.expect("Unable to retrive best individual value"),
+                                    self.best_individual_value.expect(
+                                        "Unable to retrive best individual value",
+                                    ),
                                 );
                             }
                             *tuple
@@ -146,17 +147,16 @@ impl<'a> GA<'a> {
             self.config.pop_config.dim,
             &individual_type,
         );
-        // TODO(Otavio): Create a true permuted random sequence
-        let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
-        let mut sequence: RandomSequence<u16> = config.into_iter();
-        (0..self.config.pop_config.pop_size / 2)
-            .map(|_| {
-                (sequence.next().expect("") as usize) % self.config.pop_config.pop_size
-            })
-            .for_each(|index| {
-                self.population.individuals[index] = new_population.individuals
-                    [index % (self.config.pop_config.pop_size / 2)]
-                    .clone();
+        let mut indexes =
+            (0..self.config.pop_config.pop_size).collect::<Vec<usize>>();
+        let mut rng = thread_rng();
+        indexes.shuffle(&mut rng);
+        indexes
+            .iter()
+            .take(self.config.pop_config.pop_size / 2)
+            .for_each(|&index| {
+                let new_individual = new_population.individuals[index].clone();
+                self.population.individuals[index] = new_individual;
             });
         let result = self.evaluate();
 
@@ -215,7 +215,8 @@ impl<'a> GA<'a> {
                 info!("Best Individual: {}", best_individual.chromosome.clone());
                 info!(
                     "Best Individual Value: {}",
-                    self.best_individual_value.expect("Unable to retrive best individual value")
+                    self.best_individual_value
+                        .expect("Unable to retrive best individual value")
                 );
                 info!(
                     "Best Individual Value Decoded: {}",
@@ -242,7 +243,8 @@ impl<'a> GA<'a> {
         info!(
             "State Individual: {} {} {} {} {}",
             generation,
-            self.best_individual_value.expect("Unable to retrive best individual value"),
+            self.best_individual_value
+                .expect("Unable to retrive best individual value"),
             result_mapped
                 .clone()
                 .max_by(|a, b| a.total_cmp(b))

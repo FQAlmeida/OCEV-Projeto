@@ -4,8 +4,9 @@ use std::{
     path::Path,
 };
 
-use population::{Individual, IndividualType};
 use loader_config::Config;
+use population::{Individual, IndividualType};
+
 use crate::Problem;
 
 pub struct ProblemAlgebraicFunction {

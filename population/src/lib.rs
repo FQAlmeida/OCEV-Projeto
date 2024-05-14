@@ -3,6 +3,7 @@ mod crossover;
 use std::fmt::Display;
 
 use rand::{prelude::SliceRandom, Rng};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[derive(Clone, Debug)]
 pub enum IndividualType {
@@ -183,6 +184,7 @@ impl Population {
         individual_type: &IndividualType,
     ) -> Self {
         let individuals: Vec<Individual> = (0..qtd_individuals)
+            .into_par_iter()
             .map(|_| Individual::new(dim, individual_type))
             .collect();
         Population { individuals }

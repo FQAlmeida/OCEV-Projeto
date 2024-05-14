@@ -84,7 +84,11 @@ fn main() {
         .expect("Unable to find config files")
         .map(std::result::Result::unwrap)
         .filter(|entry| {
-            entry.path().extension().expect("Unable to retrieve file extension") == "json"
+            entry
+                .path()
+                .extension()
+                .expect("Unable to retrieve file extension")
+                == "json"
                 && entry
                     .file_name()
                     .into_string()

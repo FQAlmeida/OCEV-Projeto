@@ -39,7 +39,8 @@ where
             (Box::new(Radio::new(problem, config)), config)
         }
         "ALGEBRAIC-FUNCTION" => {
-            let problem = algebraic_function::load_instance(instance).expect("Instance not found");
+            let problem = algebraic_function::load_instance(instance)
+                .expect("Instance not found");
             (Box::new(AlgebraicFunction::new(problem, config)), config)
         }
         "NQUEENS" => {
