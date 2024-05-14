@@ -4,8 +4,9 @@ use std::{
     path::Path,
 };
 
-use population::{Individual, IndividualType};
 use loader_config::Config;
+use population::Individual;
+
 use crate::Problem;
 
 pub struct ProblemAlgebraicFunction {
@@ -28,11 +29,11 @@ impl AlgebraicFunction {
 
 impl Problem for AlgebraicFunction {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        let decimal = match &individual.chromosome {
-            IndividualType::Binary(value) => {
+        let decimal = match &individual {
+            Individual::Binary(value) => {
                 value.iter().map(|&v| f64::from(u32::from(v)))
             }
-            IndividualType::Permuted(_) => todo!(),
+            Individual::Permuted(_) => todo!(),
         }
         .fold(0.0, |a, b| 2.0 * a + b);
         let value = self.problem.min_x

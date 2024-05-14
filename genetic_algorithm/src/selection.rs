@@ -21,7 +21,8 @@ impl Selection for Tournament {
         let pop_size = result.len();
         let kp = self.kp;
         let mut rng = rand::thread_rng();
-        let mut mating_pool: Vec<(usize, usize)> = Vec::with_capacity(pop_size / 2);
+        let mut mating_pool: Vec<(usize, usize)> =
+            Vec::with_capacity(pop_size / 2);
         for _ in 0..(pop_size / 2) {
             let parent1 = {
                 let p1 = rng.gen_range(0..pop_size);
@@ -74,7 +75,8 @@ impl Selection for RouletteWheel {
             .par_iter()
             .map(|(_, r)| (*r) / result_size)
             .collect::<Vec<f64>>();
-        let pop_index: Vec<usize> = result.par_iter().map(|(i, _)| *i).collect();
+        let pop_index: Vec<usize> =
+            result.par_iter().map(|(i, _)| *i).collect();
         let parents_1 = rng_choice.random_choice_f64(
             &pop_index,
             &general_probabilities,

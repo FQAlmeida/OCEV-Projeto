@@ -1,28 +1,28 @@
 #[cfg(feature = "sequential")]
 use std::iter::once;
 
-mod selection;
-
-use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use population::{Individual, IndividualType, Population};
-use loader_config::{Config, PopType};
-use log::info;
-use problem_factory::problem::Problem;
-
-use rand::{rngs::OsRng, Rng};
-use rand_unique::{RandomSequence, RandomSequenceBuilder};
 #[cfg(not(feature = "sequential"))]
 use rayon::iter::{
     once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
+
+mod selection;
+
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use loader_config::Config;
+use log::info;
+use population::{Individual, Population};
+use problem_factory::problem::Problem;
+use rand::{rngs::OsRng, Rng};
+use rand_unique::{RandomSequence, RandomSequenceBuilder};
 use selection::{RouletteWheel, Selection, Tournament};
 
 pub struct GA<'a> {
-    pub config: &'a Config,
-    pub problem: &'a (dyn Problem + Sync + Send),
-    pub population: Population,
-    pub best_individual: Option<Individual>,
-    pub best_individual_value: Option<f64>,
+    config: &'a Config,
+    problem: &'a (dyn Problem + Sync + Send),
+    population: Population,
+    best_individual: Option<Individual>,
+    best_individual_value: Option<f64>,
     multi_progress_bar: &'a MultiProgress,
     generations_without_improvement: usize,
     generation: usize,
@@ -35,16 +35,10 @@ impl<'a> GA<'a> {
         config: &'a Config,
         multi_progress_bar: &'a MultiProgress,
     ) -> Self {
-        let individual_type = match config.pop_config.pop_type {
-            PopType::Binary => IndividualType::Binary(vec![]),
-            PopType::Real => todo!(),
-            PopType::Integer => todo!(),
-            PopType::Permuted => IndividualType::Permuted(vec![]),
-        };
         let population = Population::new(
             config.pop_config.pop_size,
             config.pop_config.dim,
-            &individual_type,
+            &config.pop_config.pop_type,
         );
         let selection_method: Box<dyn Selection + Sync + Send> =
             match config.selection_method {
@@ -121,30 +115,26 @@ impl<'a> GA<'a> {
             }
         } else {
             self.best_individual_value = Some(best_individual_value);
-            self.best_individual =
-                Some(self.population.individuals[*best_individual_index].clone());
+            self.best_individual = Some(
+                self.population.individuals[*best_individual_index].clone(),
+            );
         }
         new_result
     }
 
     fn genocide(&mut self) -> Vec<(usize, f64)> {
         self.generations_without_improvement = 0;
-        let individual_type = match self.config.pop_config.pop_type {
-            PopType::Binary => IndividualType::Binary(vec![]),
-            PopType::Real => todo!(),
-            PopType::Integer => todo!(),
-            PopType::Permuted => IndividualType::Permuted(vec![]),
-        };
         let new_population = Population::new(
             self.config.pop_config.pop_size / 2,
             self.config.pop_config.dim,
-            &individual_type,
+            &self.config.pop_config.pop_type,
         );
         let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
         let mut sequence: RandomSequence<u16> = config.into_iter();
         (0..self.config.pop_config.pop_size / 2)
             .map(|_| {
-                (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size
+                (sequence.next().unwrap() as usize)
+                    % self.config.pop_config.pop_size
             })
             .for_each(|index| {
                 self.population.individuals[index] = new_population.individuals
@@ -170,21 +160,19 @@ impl<'a> GA<'a> {
         let couples_mapped = mating_pool_iter.map(|(parent1, parent2)| {
             let mut rng = rand::thread_rng();
             let crossover = rng.gen::<f64>();
-            let mut child1 = self.population.individuals[*parent1].clone();
-            let mut child2 = self.population.individuals[*parent2].clone();
+            let child1 = &self.population.individuals[*parent1];
+            let child2 = &self.population.individuals[*parent2];
             if crossover <= crossover_chance {
-                let crossover_point = rng.gen_range(0..self.config.pop_config.dim);
-                (child1, child2) = child1.crossover(&child2, crossover_point);
+                return child1
+                    .crossover(&child2, &self.config.crossover_method);
             }
-            (child1, child2)
+            (child1.clone(), child2.clone())
         });
-        let new_population: Population = Population {
+        Population {
             individuals: couples_mapped
                 .flat_map(|tuple| once(tuple.0).chain(once(tuple.1)))
                 .collect(),
-        };
-
-        new_population
+        }
     }
 
     fn mutation(&self, new_population: &Population) -> Population {
@@ -194,8 +182,8 @@ impl<'a> GA<'a> {
         let individuals_iter = new_population.individuals.iter();
 
         let mutation_chance = self.config.mutation_chance;
-        let mutated_population =
-            individuals_iter.map(|individual| individual.mutate(mutation_chance));
+        let mutated_population = individuals_iter
+            .map(|individual| individual.mutate(mutation_chance));
 
         Population {
             individuals: mutated_population.collect(),
@@ -205,7 +193,7 @@ impl<'a> GA<'a> {
     fn log_run_result(&self) {
         match &self.best_individual {
             Some(best_individual) => {
-                info!("Best Individual: {}", best_individual.chromosome.clone());
+                info!("Best Individual: {}", best_individual.clone());
                 info!(
                     "Best Individual Value: {}",
                     self.best_individual_value.unwrap()
@@ -291,7 +279,8 @@ impl<'a> GA<'a> {
 
         let proportion = if generation < total_generations * 0.8 {
             self.config.generation_gap
-                + (((1.0 - self.config.generation_gap) / total_generations * 0.8)
+                + (((1.0 - self.config.generation_gap) / total_generations
+                    * 0.8)
                     * generation)
         } else {
             1.0
@@ -315,7 +304,10 @@ impl<'a> GA<'a> {
         }
     }
 
-    fn check_genocide(&mut self, new_result: &[(usize, f64)]) -> Vec<(usize, f64)> {
+    fn check_genocide(
+        &mut self,
+        new_result: &[(usize, f64)],
+    ) -> Vec<(usize, f64)> {
         if self.generations_without_improvement
             >= self.config.generations_to_genocide
         {

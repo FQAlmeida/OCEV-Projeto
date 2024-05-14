@@ -4,8 +4,9 @@ use std::{
     path::Path,
 };
 
-use population::{Individual, IndividualType};
 use loader_config::Config;
+use population::Individual;
+
 use crate::Problem;
 
 pub struct ProblemRadio {
@@ -29,11 +30,11 @@ impl Radio {
 
 impl Problem for Radio {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        let values: Vec<f64> = match &individual.chromosome {
-            IndividualType::Binary(value) => {
+        let values: Vec<f64> = match &individual {
+            Individual::Binary(value) => {
                 value.iter().map(|&v| f64::from(u32::from(v)))
             }
-            IndividualType::Permuted(_) => todo!(),
+            Individual::Permuted(_) => todo!(),
         }
         .collect();
         let qtd_line_a: f64 = values[0..5]
@@ -60,7 +61,8 @@ impl Problem for Radio {
     fn constraint(&self, individual: &[f64]) -> f64 {
         let qtd_1 = individual[0];
         let qtd_2 = individual[1];
-        let penalty = ((qtd_1 + (2.0 * qtd_2)) - self.problem.qtd_employees as f64)
+        let penalty = ((qtd_1 + (2.0 * qtd_2))
+            - self.problem.qtd_employees as f64)
             / self.problem.max_h;
 
         let penalty_2 = f64::max(0.0, (qtd_1 - 24.0) / 8.0);

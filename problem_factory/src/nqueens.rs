@@ -5,7 +5,7 @@ use std::{
 };
 
 use loader_config::Config;
-use population::{Individual, IndividualType};
+use population::Individual;
 
 use crate::Problem;
 
@@ -29,11 +29,11 @@ impl NQueens {
 
 impl Problem for NQueens {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        match &individual.chromosome {
-            IndividualType::Binary(_) => {
+        match &individual {
+            Individual::Binary(_) => {
                 todo!()
             }
-            IndividualType::Permuted(value) => value.iter().map(|&v| v as f64),
+            Individual::Permuted(value) => value.iter().map(|&v| v as f64),
         }
         .collect()
     }
@@ -43,7 +43,8 @@ impl Problem for NQueens {
     }
 
     fn normed_objective(&self, individual: &[f64]) -> f64 {
-        1.0 - (self.objective(individual) / (self.problem.board_size - 1) as f64)
+        1.0 - (self.objective(individual)
+            / (self.problem.board_size - 1) as f64)
     }
 
     fn constraint(&self, _: &[f64]) -> f64 {
@@ -74,7 +75,8 @@ impl Problem for NQueens {
                         return 0;
                     }
                     let next_queen_col = next_queen as usize;
-                    if (queen_col >= offset && next_queen_col == queen_col - offset)
+                    if (queen_col >= offset
+                        && next_queen_col == queen_col - offset)
                         || (queen_col + offset < self.problem.board_size
                             && next_queen_col == queen_col + offset)
                     {

@@ -54,7 +54,10 @@ pub fn radio_benchmark(c: &mut Criterion) {
                 &config,
                 |b, config| {
                     b.iter(|| {
-                        run_radio("../data/instances/radio/radio_1.txt", *config)
+                        run_radio(
+                            "../data/instances/radio/radio_1.txt",
+                            *config,
+                        )
                     })
                 },
             );

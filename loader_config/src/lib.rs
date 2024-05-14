@@ -18,7 +18,7 @@ pub enum SelectionMethod {
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub enum CrossOverMethod {
+pub enum CrossoverMethod {
     OnePoint,
     TwoPoints,
     Uniform,
@@ -47,7 +47,7 @@ pub struct Config {
     pub generations_to_genocide: usize,
     pub elitism: bool,
     pub selection_method: SelectionMethod,
-    pub crossover_method: CrossOverMethod,
+    pub crossover_method: CrossoverMethod,
     pub crossover_chance: f64,
     pub mutation_chance: f64,
     pub constraint_penalty: f64,
@@ -69,7 +69,7 @@ impl Default for Config {
             generations_to_genocide: 250,
             elitism: true,
             selection_method: SelectionMethod::Tournament,
-            crossover_method: CrossOverMethod::OnePoint,
+            crossover_method: CrossoverMethod::OnePoint,
             crossover_chance: 0.9,
             mutation_chance: 0.03,
             constraint_penalty: -1.0,
@@ -95,7 +95,8 @@ impl Config {
     {
         let data = fs::read_to_string(path).expect("Failed to read file");
         let config_data: Value = serde_json::from_str(&data)?;
-        let obj: Config = serde_json::from_value(config_data["config"].clone())?;
+        let obj: Config =
+            serde_json::from_value(config_data["config"].clone())?;
         Ok(obj)
     }
 }

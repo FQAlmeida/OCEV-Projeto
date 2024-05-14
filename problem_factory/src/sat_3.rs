@@ -4,8 +4,9 @@ use std::{
     path::Path,
 };
 
-use population::{Individual, IndividualType};
 use loader_config::Config;
+use population::Individual;
+
 use crate::Problem;
 
 pub struct SAT3 {
@@ -27,11 +28,11 @@ impl SAT3 {
 
 impl Problem for SAT3 {
     fn decode(&self, individual: &Individual) -> Vec<f64> {
-        match &individual.chromosome {
-            IndividualType::Binary(value) => {
+        match &individual {
+            Individual::Binary(value) => {
                 value.iter().map(|&v| f64::from(u32::from(v)))
             }
-            IndividualType::Permuted(_) => todo!(),
+            Individual::Permuted(_) => todo!(),
         }
         .collect()
     }
