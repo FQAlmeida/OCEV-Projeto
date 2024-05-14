@@ -4,8 +4,9 @@ use std::{
     path::Path,
 };
 
-use population::{Individual, IndividualType};
 use loader_config::Config;
+use population::{Individual, IndividualType};
+
 use crate::Problem;
 
 pub struct SAT3 {
@@ -131,11 +132,23 @@ where
 {
     let problem = read_lines(filename)?
         .map(|line| {
-            let line = line.unwrap();
+            let line = line.expect("Unable to read line");
             let mut clause = line.split_whitespace();
-            let a: i32 = clause.next().unwrap().parse().unwrap();
-            let b: i32 = clause.next().unwrap().parse().unwrap();
-            let c: i32 = clause.next().unwrap().parse().unwrap();
+            let a: i32 = clause
+                .next()
+                .expect("Unable to read first number")
+                .parse()
+                .expect("Unable to convert first number to i32");
+            let b: i32 = clause
+                .next()
+                .expect("Unable to read second number")
+                .parse()
+                .expect("Unable to convert second number to i32");
+            let c: i32 = clause
+                .next()
+                .expect("Unable to read third number")
+                .parse()
+                .expect("Unable to convert third number to i32");
             (a, b, c)
         })
         .collect::<Vec<(i32, i32, i32)>>();

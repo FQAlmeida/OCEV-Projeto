@@ -106,10 +106,10 @@ where
 {
     let problem = read_lines(filename)?
         .map(|line| {
-            let line = line.unwrap();
+            let line = line.expect("Unable to read line");
             return line
                 .split_whitespace()
-                .map(|i| i.parse().unwrap())
+                .map(|i| i.parse().expect("Unable to parse number"))
                 .collect();
         })
         .collect::<Vec<Vec<f64>>>();

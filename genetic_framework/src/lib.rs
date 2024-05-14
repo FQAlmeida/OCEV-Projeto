@@ -1,8 +1,8 @@
 use genetic_algorithm::GA;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use population::Individual;
 use loader_config::Config;
 use log::info;
+use population::Individual;
 use problem_factory::problem::Problem;
 
 pub struct Framework {
@@ -30,22 +30,36 @@ impl Framework {
         let sty = ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         )
-        .unwrap();
+        .expect("Failed to build progress bar template");
 
-        let pb = m.add(ProgressBar::new(self.config.qtd_runs.try_into().unwrap()));
+        let pb = m.add(ProgressBar::new(self.config.qtd_runs as u64));
 
         pb.set_style(sty);
         pb.set_message("Runs");
 
         info!("Problem: {}", self.problem.get_name());
-        info!("Config: {}", serde_json::to_string(&self.config).unwrap());
+        info!(
+            "Config: {}",
+            serde_json::to_string(&self.config)
+                .expect("Failed to convert config to json string")
+        );
         for run in 1..=self.config.qtd_runs {
             info!("Run: {}", run);
             let mut ga = GA::new(&*self.problem, &self.config, &m);
             let (new_individual, new_result) = &ga.run();
-            if result.is_none() || new_result.unwrap() > result.unwrap() {
-                (best_individual, result) =
-                    (Some(new_individual.as_ref().unwrap().clone()), *new_result);
+            if result.is_none()
+                || new_result.expect("New result is empty")
+                    > result.expect("Result is empty")
+            {
+                (best_individual, result) = (
+                    Some(
+                        new_individual
+                            .as_ref()
+                            .expect("Unable to retrieve new individual")
+                            .clone(),
+                    ),
+                    *new_result,
+                );
             }
             pb.inc(1);
             info!("End Run: {}", run);

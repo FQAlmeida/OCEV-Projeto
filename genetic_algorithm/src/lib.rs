@@ -4,11 +4,10 @@ use std::iter::once;
 mod selection;
 
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use population::{Individual, IndividualType, Population};
 use loader_config::{Config, PopType};
 use log::info;
+use population::{Individual, IndividualType, Population};
 use problem_factory::problem::Problem;
-
 use rand::{rngs::OsRng, Rng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
 #[cfg(not(feature = "sequential"))]
@@ -86,12 +85,16 @@ impl<'a> GA<'a> {
         let mut new_result = result.to_vec();
         let (best_individual_index, best_individual_value_scaled) = new_result
             .iter()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-            .unwrap();
+            .max_by(|(_, a), (_, b)| {
+                a.partial_cmp(b).expect("Failed to compare values.")
+            })
+            .expect("Failed to get best individual.");
         let (worst_individual_index, _) = new_result
             .iter()
-            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-            .unwrap();
+            .min_by(|(_, a), (_, b)| {
+                a.partial_cmp(b).expect("Failed to compare values.")
+            })
+            .expect("Failed to get worst individual.");
         let best_individual_value = *best_individual_value_scaled;
         if let Some(current_best) = self.best_individual_value {
             if best_individual_value >= current_best {
@@ -103,15 +106,18 @@ impl<'a> GA<'a> {
             } else {
                 self.generations_without_improvement += 1;
                 if self.config.elitism {
-                    self.population.individuals[*worst_individual_index] =
-                        self.best_individual.as_ref().unwrap().clone();
+                    self.population.individuals[*worst_individual_index] = self
+                        .best_individual
+                        .as_ref()
+                        .expect("Unable to retrive best individual")
+                        .clone();
                     new_result = new_result
                         .iter()
                         .map(|tuple| {
                             if tuple.0 == *worst_individual_index {
                                 return (
                                     *worst_individual_index,
-                                    self.best_individual_value.unwrap(),
+                                    self.best_individual_value.expect("Unable to retrive best individual value"),
                                 );
                             }
                             *tuple
@@ -140,11 +146,12 @@ impl<'a> GA<'a> {
             self.config.pop_config.dim,
             &individual_type,
         );
+        // TODO(Otavio): Create a true permuted random sequence
         let config = RandomSequenceBuilder::<u16>::rand(&mut OsRng);
         let mut sequence: RandomSequence<u16> = config.into_iter();
         (0..self.config.pop_config.pop_size / 2)
             .map(|_| {
-                (sequence.next().unwrap() as usize) % self.config.pop_config.pop_size
+                (sequence.next().expect("") as usize) % self.config.pop_config.pop_size
             })
             .for_each(|index| {
                 self.population.individuals[index] = new_population.individuals
@@ -208,7 +215,7 @@ impl<'a> GA<'a> {
                 info!("Best Individual: {}", best_individual.chromosome.clone());
                 info!(
                     "Best Individual Value: {}",
-                    self.best_individual_value.unwrap()
+                    self.best_individual_value.expect("Unable to retrive best individual value")
                 );
                 info!(
                     "Best Individual Value Decoded: {}",
@@ -235,7 +242,7 @@ impl<'a> GA<'a> {
         info!(
             "State Individual: {} {} {} {} {}",
             generation,
-            self.best_individual_value.unwrap(),
+            self.best_individual_value.expect("Unable to retrive best individual value"),
             result_mapped
                 .clone()
                 .max_by(|a, b| a.total_cmp(b))
@@ -260,12 +267,12 @@ impl<'a> GA<'a> {
             .par_iter()
             .map(|(_, value)| value)
             .min_by(|a, b| a.total_cmp(b))
-            .unwrap();
+            .expect("Failed to get min value.");
         let max = *result
             .par_iter()
             .map(|(_, value)| value)
             .max_by(|a, b| a.total_cmp(b))
-            .unwrap();
+            .expect("Failed to get max value.");
         let average = result.par_iter().map(|(_, value)| value).sum::<f64>()
             / result.len() as f64;
         let (alpha, beta) = if min > (c * average - max) / (c - 1.0) {
@@ -331,10 +338,10 @@ impl<'a> GA<'a> {
         let sty = ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         )
-        .unwrap();
+        .expect("Failed to build progress bar template");
         let pb = self
             .multi_progress_bar
-            .add(ProgressBar::new(self.config.qtd_gen.try_into().unwrap()));
+            .add(ProgressBar::new(self.config.qtd_gen as u64));
         pb.set_style(sty);
 
         for generation in 1..=self.config.qtd_gen {

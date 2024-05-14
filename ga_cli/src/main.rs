@@ -1,4 +1,4 @@
-use std::fs::{self};
+use std::fs;
 
 use anyhow::Result;
 use genetic_framework::Framework;
@@ -13,11 +13,11 @@ use log4rs::{
 
 fn format_path(path: ListOption<&String>) -> String {
     fs::canonicalize(path.value)
-        .unwrap()
+        .expect("Failed to canonicalize path")
         .file_name()
-        .unwrap()
+        .expect("Failed to get file name")
         .to_str()
-        .unwrap()
+        .expect("Failed to convert to string")
         .to_string()
 }
 
@@ -33,7 +33,7 @@ fn config_tracing(problem_name: &str) {
         // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html
         .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
         .build(file_path)
-        .unwrap();
+        .expect("Unable to build file appender");
 
     // Log Trace level output to file where trace is the default level
     // and the programmatically specified level to stderr.
@@ -44,7 +44,7 @@ fn config_tracing(problem_name: &str) {
                 .appender("log_file")
                 .build(LevelFilter::Info),
         )
-        .unwrap();
+        .expect("Unable to build log config");
 
     // Use this to change log levels at runtime.
     // This means you can change the default log level to trace
@@ -65,13 +65,13 @@ fn main() {
 
     let instances_options: Vec<String> =
         fs::read_dir(format!("data/instances/{}", problem_name.to_lowercase()))
-            .unwrap()
+            .expect("Unable to find instances")
             .map(|entry| {
-                fs::canonicalize(entry.unwrap().path())
-                    .unwrap()
+                fs::canonicalize(entry.expect("Unable to retrieve entry").path())
+                    .expect("Unable to canonicalize path")
                     .into_os_string()
                     .into_string()
-                    .unwrap()
+                    .expect("Unable to convert to string")
             })
             .collect();
     let instance_answer: Result<String, InquireError> =
@@ -81,22 +81,22 @@ fn main() {
     let instance = instance_answer.expect("Instance not found");
 
     let config_options: Vec<String> = fs::read_dir("data/config")
-        .unwrap()
+        .expect("Unable to find config files")
         .map(std::result::Result::unwrap)
         .filter(|entry| {
-            entry.path().extension().unwrap() == "json"
+            entry.path().extension().expect("Unable to retrieve file extension") == "json"
                 && entry
                     .file_name()
                     .into_string()
-                    .unwrap()
+                    .expect("Unable to convert to string")
                     .starts_with(problem_name.to_lowercase().as_str())
         })
         .map(|entry| {
             fs::canonicalize(entry.path())
-                .unwrap()
+                .expect("Unable to canonicalize path")
                 .into_os_string()
                 .into_string()
-                .unwrap()
+                .expect("Unable to convert to string")
         })
         .collect();
     let config_answer: Result<String, InquireError> =
