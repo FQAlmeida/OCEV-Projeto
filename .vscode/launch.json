@@ -140,12 +140,34 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Debug executable 'ga_cli' with args",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=ga_cli",
+                    "--package=ga_cli",
+                ],
+                "filter": {
+                    "name": "ga_cli",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "--problem-name=sat3",
+                "--instance=data/instances/sat-3/uf100-01.cnf",
+                "--config=data/config/sat-3-uf100-01.json"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Debug executable 'ga_cli'",
             "cargo": {
                 "args": [
                     "build",
                     "--bin=ga_cli",
-                    "--package=ga_cli"
+                    "--package=ga_cli",
                 ],
                 "filter": {
                     "name": "ga_cli",
