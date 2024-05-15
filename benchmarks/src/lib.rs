@@ -8,7 +8,7 @@ use problem_factory::{
 };
 
 pub fn run_sat(instance: &str, config: Config) -> Result<()> {
-    let problem = sat_3::load_instance(instance).unwrap();
+    let problem = sat_3::load_instance(instance).expect("Unable to load instance");
     let problem = Box::new(SAT3::new(&problem, config));
 
     let ga_framework = Framework::new(problem, config);
@@ -18,7 +18,8 @@ pub fn run_sat(instance: &str, config: Config) -> Result<()> {
 }
 
 pub fn run_algebraic(instance: &str, config: Config) -> Result<()> {
-    let problem = algebraic_function::load_instance(instance).unwrap();
+    let problem = algebraic_function::load_instance(instance)
+        .expect("Unable to load instance");
     let problem = Box::new(AlgebraicFunction::new(problem, config));
 
     let ga_framework = Framework::new(problem, config);
@@ -28,7 +29,7 @@ pub fn run_algebraic(instance: &str, config: Config) -> Result<()> {
 }
 
 pub fn run_radio(instance: &str, config: Config) -> Result<()> {
-    let problem = radio::load_instance(instance).unwrap();
+    let problem = radio::load_instance(instance).expect("Unable to load instance");
     let problem = Box::new(Radio::new(problem, config));
 
     let ga_framework = Framework::new(problem, config);

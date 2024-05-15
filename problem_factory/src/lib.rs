@@ -26,22 +26,26 @@ pub fn problem_factory<P>(
 where
     P: AsRef<Path>,
 {
-    let config = Config::new(config_path).unwrap();
+    let config = Config::new(config_path).expect("Config not found");
     match problem.to_uppercase().as_str() {
         "SAT-3" => {
-            let problem = sat_3::load_instance(instance).unwrap();
+            let problem =
+                sat_3::load_instance(instance).expect("Instance not found");
             (Box::new(SAT3::new(&problem, config)), config)
         }
         "RADIO" => {
-            let problem = radio::load_instance(instance).unwrap();
+            let problem =
+                radio::load_instance(instance).expect("Instance not found");
             (Box::new(Radio::new(problem, config)), config)
         }
         "ALGEBRAIC-FUNCTION" => {
-            let problem = algebraic_function::load_instance(instance).unwrap();
+            let problem = algebraic_function::load_instance(instance)
+                .expect("Instance not found");
             (Box::new(AlgebraicFunction::new(problem, config)), config)
         }
         "NQUEENS" => {
-            let problem = nqueens::load_instance(instance).unwrap();
+            let problem =
+                nqueens::load_instance(instance).expect("Instance not found");
             (Box::new(NQueens::new(problem, config)), config)
         }
         _ => panic!("Problem not found"),

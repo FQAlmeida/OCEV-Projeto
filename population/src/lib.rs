@@ -7,6 +7,7 @@ use crossover::{
 };
 use loader_config::{CrossoverMethod, PopType};
 use rand::{prelude::SliceRandom, Rng};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[derive(Clone, Debug)]
 pub enum Individual {
@@ -106,7 +107,8 @@ impl Population {
     #[must_use]
     pub fn new(qtd_individuals: usize, dim: usize, pop_type: &PopType) -> Self {
         let individuals: Vec<Individual> = (0..qtd_individuals)
-            .map(|_| Individual::new(dim, pop_type))
+            .into_par_iter()
+            .map(|_| Individual::new(dim, individual_type))
             .collect();
         Population { individuals }
     }

@@ -17,3 +17,6 @@ tracing = {version = "0.1.40"}
 log = {version = "0.4.21"}
 anyhow = {version="1.0.82"}
 random_choice = {version = "0.3.2"}
+
+[features]
+sequential = []
