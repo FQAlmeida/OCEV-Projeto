@@ -41,7 +41,7 @@ pub fn validate_instance(problem_name: &str, instance: &str) -> Result<()> {
     if !instance.contains(&problem_name.to_lowercase()) {
         return Err(anyhow::anyhow!("Invalid instance path"));
     }
-    if !fs::metadata(&instance)?.is_file() {
+    if !fs::metadata(instance)?.is_file() {
         return Err(anyhow::anyhow!("Instance not found"));
     }
     Ok(())
@@ -68,7 +68,7 @@ pub fn validate_config(problem_name: &str, config: &str) -> Result<()> {
     if !config.contains(&problem_name.to_lowercase()) {
         return Err(anyhow::anyhow!("Invalid config path"));
     }
-    if !fs::metadata(&config)?.is_file() {
+    if !fs::metadata(config)?.is_file() {
         return Err(anyhow::anyhow!("Config not found"));
     }
     Ok(())

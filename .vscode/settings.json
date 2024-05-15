@@ -3,13 +3,15 @@
         "appender",
         "canonicalize",
         "chrono",
+        "dhall",
         "indicatif",
         "nqueens",
         "ocev",
         "powf",
         "projeto",
         "rngs",
-        "serde"
+        "serde",
+        "starlark"
     ],
     "python.analysis.autoImportCompletions": true,
     "python.analysis.typeCheckingMode": "basic"

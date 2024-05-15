@@ -108,7 +108,7 @@ impl Population {
     pub fn new(qtd_individuals: usize, dim: usize, pop_type: &PopType) -> Self {
         let individuals: Vec<Individual> = (0..qtd_individuals)
             .into_par_iter()
-            .map(|_| Individual::new(dim, individual_type))
+            .map(|_| Individual::new(dim, pop_type))
             .collect();
         Population { individuals }
     }

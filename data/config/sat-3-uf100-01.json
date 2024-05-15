@@ -5,16 +5,16 @@
       "pop_size": 100,
       "pop_type": "Binary"
     },
-    "qtd_gen": 5000,
+    "qtd_gen": 15000,
     "qtd_runs": 10,
     "selection_method": "Roulette",
-    "crossover_method": "OnePoint",
-    "crossover_chance": 0.9,
-    "mutation_chance": 0.001,
+    "crossover_method": "TwoPoints",
+    "crossover_chance": 0.8,
+    "mutation_chance": 0.005,
     "constraint_penalty": -1.0,
     "elitism": true,
-    "generations_to_genocide": 5000,
-    "kp": 0.95,
-    "generation_gap": 0.1
+    "generations_to_genocide": 20000,
+    "kp": 0.99,
+    "generation_gap": 0.0
   }
 }

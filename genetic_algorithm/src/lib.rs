@@ -9,15 +9,11 @@ use rayon::iter::{
 mod selection;
 
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use loader_config::{Config, PopType};
+use loader_config::Config;
 use log::info;
 use population::{Individual, Population};
 use problem_factory::problem::Problem;
 use rand::{seq::SliceRandom, thread_rng, Rng};
-#[cfg(not(feature = "sequential"))]
-use rayon::iter::{
-    once, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
 use selection::{RouletteWheel, Selection, Tournament};
 
 pub struct GA<'a> {
@@ -107,7 +103,7 @@ impl<'a> GA<'a> {
                     self.population.individuals[*worst_individual_index] = self
                         .best_individual
                         .as_ref()
-                        .expect("Unable to retrive best individual")
+                        .expect("Unable to retrieve best individual")
                         .clone();
                     new_result = new_result
                         .iter()
@@ -116,7 +112,8 @@ impl<'a> GA<'a> {
                                 return (
                                     *worst_individual_index,
                                     self.best_individual_value.expect(
-                                        "Unable to retrive best individual value",
+                                        "Unable to retrieve best individual \
+                                         value",
                                     ),
                                 );
                             }
@@ -175,7 +172,7 @@ impl<'a> GA<'a> {
             let child2 = &self.population.individuals[*parent2];
             if crossover <= crossover_chance {
                 return child1
-                    .crossover(&child2, &self.config.crossover_method);
+                    .crossover(child2, &self.config.crossover_method);
             }
             (child1.clone(), child2.clone())
         });
@@ -208,7 +205,7 @@ impl<'a> GA<'a> {
                 info!(
                     "Best Individual Value: {}",
                     self.best_individual_value
-                        .expect("Unable to retrive best individual value")
+                        .expect("Unable to retrieve best individual value")
                 );
                 info!(
                     "Best Individual Value Decoded: {}",
@@ -236,7 +233,7 @@ impl<'a> GA<'a> {
             "State Individual: {} {} {} {} {}",
             generation,
             self.best_individual_value
-                .expect("Unable to retrive best individual value"),
+                .expect("Unable to retrieve best individual value"),
             result_mapped
                 .clone()
                 .max_by(|a, b| a.total_cmp(b))
