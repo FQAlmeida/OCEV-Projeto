@@ -5,16 +5,16 @@
       "pop_size": 100,
       "pop_type": "Permuted"
     },
-    "qtd_gen": 20000,
-    "qtd_runs": 5,
+    "qtd_gen": 25000,
+    "qtd_runs": 2,
     "selection_method": "Roulette",
-    "crossover_method": "OnePoint",
+    "crossover_method": "Cycle",
     "crossover_chance": 0.95,
-    "mutation_chance": 0.0005,
+    "mutation_chance": 0.0002,
     "constraint_penalty": -1.0,
     "elitism": true,
     "generations_to_genocide": 20000,
     "kp": 0.95,
-    "generation_gap": 0.1
+    "generation_gap": 0.3
   }
 }

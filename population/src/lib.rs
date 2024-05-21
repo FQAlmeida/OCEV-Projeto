@@ -3,7 +3,8 @@ mod crossover;
 use std::fmt::Display;
 
 use crossover::{
-    Crossover, CycleCrossover, OnePointCrossover, TwoPointsCrossover,
+    Crossover, CycleCrossover, OnePointCrossover, PartiallyMappedCrossover,
+    TwoPointsCrossover, UniformCrossover,
 };
 use loader_config::{CrossoverMethod, PopType};
 use rand::{prelude::SliceRandom, Rng};
@@ -73,9 +74,13 @@ impl Individual {
             CrossoverMethod::TwoPoints => {
                 TwoPointsCrossover::crossover(self, parent_2)
             }
-            CrossoverMethod::Uniform => todo!(),
+            CrossoverMethod::Uniform => {
+                UniformCrossover::crossover(self, parent_2)
+            }
             CrossoverMethod::Cycle => CycleCrossover::crossover(self, parent_2),
-            CrossoverMethod::Permuted => todo!(),
+            CrossoverMethod::PartiallyMapped => {
+                PartiallyMappedCrossover::crossover(self, parent_2)
+            }
         }
     }
 

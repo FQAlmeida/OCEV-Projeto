@@ -8,7 +8,7 @@
     "qtd_gen": 20,
     "qtd_runs": 3,
     "selection_method": "Roulette",
-    "crossover_method": "OnePoint",
+    "crossover_method": "Uniform",
     "crossover_chance": 0.9,
     "mutation_chance": 0.02,
     "constraint_penalty": -1.0,

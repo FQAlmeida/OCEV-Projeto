@@ -23,7 +23,7 @@ pub enum CrossoverMethod {
     TwoPoints,
     Uniform,
     Cycle,
-    Permuted,
+    PartiallyMapped,
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
