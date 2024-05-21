@@ -9,12 +9,12 @@
     "qtd_runs": 10,
     "selection_method": "Roulette",
     "crossover_method": "TwoPoints",
-    "crossover_chance": 0.8,
-    "mutation_chance": 0.005,
+    "crossover_chance": 0.95,
+    "mutation_chance": 0.0025,
     "constraint_penalty": -1.0,
     "elitism": true,
-    "generations_to_genocide": 20000,
-    "kp": 0.99,
-    "generation_gap": 0.0
+    "generations_to_genocide": 30000,
+    "kp": 0.95,
+    "generation_gap": 0.6
   }
 }

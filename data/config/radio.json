@@ -13,9 +13,9 @@
     "mutation_chance": 0.04,
     "constraint_penalty": -1.2,
     "elitism": true,
-    "generations_to_genocide": 15,
+    "generations_to_genocide": 150,
     "kp": 0.95,
-    "generation_gap": 1.0,
+    "generation_gap": 0.6,
     "linear_scaling": 2.0
   }
 }

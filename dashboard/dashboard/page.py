@@ -14,7 +14,7 @@ st.set_page_config(st.session_state.get("title", "Resultados"), "🧬", "wide")
 
 
 files = list(filter(lambda x: x.is_file(), Path("../data/outputs").glob("*.log")))
-most_recent_files = sorted(files, key=os.path.getmtime, reverse=True)[:10]
+most_recent_files = sorted(files, key=os.path.getmtime, reverse=True)
 
 
 def format_func(x):

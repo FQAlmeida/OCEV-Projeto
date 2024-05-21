@@ -68,13 +68,13 @@ impl Default for Config {
             qtd_runs: 3,
             generations_to_genocide: 250,
             elitism: true,
-            selection_method: SelectionMethod::Tournament,
-            crossover_method: CrossoverMethod::OnePoint,
+            selection_method: SelectionMethod::Roulette,
+            crossover_method: CrossoverMethod::TwoPoints,
             crossover_chance: 0.9,
             mutation_chance: 0.03,
             constraint_penalty: -1.0,
             kp: 0.9,
-            generation_gap: 1.0,
+            generation_gap: 0.6,
         }
     }
 }
