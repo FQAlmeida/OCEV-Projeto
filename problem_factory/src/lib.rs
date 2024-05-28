@@ -1,16 +1,16 @@
 use std::path::Path;
 
-use loader_config::Config;
-use nqueens::NQueens;
-
-pub mod problem;
-
 pub mod algebraic_function;
 pub mod nqueens;
+pub mod nqueens_weighted;
+pub mod problem;
 pub mod radio;
 pub mod sat_3;
 
 use algebraic_function::AlgebraicFunction;
+use loader_config::Config;
+use nqueens::NQueens;
+use nqueens_weighted::NQueensWeighted;
 use problem::Problem;
 use radio::Radio;
 use sat_3::SAT3;
@@ -47,6 +47,11 @@ where
             let problem =
                 nqueens::load_instance(instance).expect("Instance not found");
             (Box::new(NQueens::new(problem, config)), config)
+        }
+        "NQUEENS-WEIGHTED" => {
+            let problem = nqueens_weighted::load_instance(instance)
+                .expect("Instance not found");
+            (Box::new(NQueensWeighted::new(problem, config)), config)
         }
         _ => panic!("Problem not found"),
     }

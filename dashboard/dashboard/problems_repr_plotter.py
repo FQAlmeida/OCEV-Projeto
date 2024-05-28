@@ -28,4 +28,5 @@ def nqueen_plotter(solution: list[int | float]):
 
 problems_dict = {
     "N-QUEENS": nqueen_plotter,
+    "N-QUEENS-WEIGHTED": nqueen_plotter,
 }

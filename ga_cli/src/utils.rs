@@ -28,6 +28,8 @@ pub enum Problems {
     AlgebraicFunction,
     #[strum(serialize = "NQUEENS")]
     NQueens,
+    #[strum(serialize = "NQUEENS-WEIGHTED")]
+    NQueensWeighted,
 }
 
 pub fn ask_for_problem_name() -> Result<String> {
