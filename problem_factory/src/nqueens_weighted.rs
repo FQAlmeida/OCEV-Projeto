@@ -133,10 +133,12 @@ where
     let board_size = problem[0][0];
     let max_fo = (0..board_size as usize)
         .map(|i| {
+            let fi = i as f64;
+            let index = fi * board_size + (board_size - 1.0);
             if i % 2 == 0 {
-                (i as f64 * board_size).sqrt()
+                (index).sqrt()
             } else {
-                (i as f64 * board_size).log10()
+                (index).log10()
             }
         })
         .sum::<f64>();

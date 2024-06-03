@@ -1,20 +1,20 @@
 {
   "config": {
     "pop_config": {
-      "dim": 128,
-      "pop_size": 50,
+      "dim": 16,
+      "pop_size": 30,
       "pop_type": "Permuted"
     },
-    "qtd_gen": 15000,
+    "qtd_gen": 5000,
     "qtd_runs": 10,
     "selection_method": "Roulette",
     "crossover_method": "Cycle",
-    "crossover_chance": 0.95,
-    "mutation_chance": 0.005,
-    "constraint_penalty": -1.2,
+    "crossover_chance": 1.0,
+    "mutation_chance": 0.015,
+    "constraint_penalty": -1.0,
     "elitism": true,
     "generations_to_genocide": 150000,
-    "kp": 0.95,
-    "generation_gap": 0.3
+    "kp": 0.9,
+    "generation_gap": 0.4
   }
 }
