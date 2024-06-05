@@ -7,6 +7,7 @@ from pathlib import Path
 import plotly.express as px
 import polars as pl
 import streamlit as st
+import numpy as np
 from problems_repr_plotter import problems_dict
 from read_log_file import read_log_file
 
@@ -72,6 +73,18 @@ st.plotly_chart(
         labels={"y": "Resultados de cada Execução"},
     ),
     use_container_width=True,
+)
+fitness = np.array(list(map(lambda run: run.best_normed ,problem_data.runs)))
+best_all_runs = problem_data.runs[np.argmax(fitness)]
+st.dataframe(
+    pl.DataFrame({
+        "Mean": fitness.mean(),
+        "Std": fitness.std(),
+        "Best Value Human-Readable": best_all_runs.best,
+        "Best Human-Readable": pprint.pformat(best_all_runs.decoded),
+    }),
+    use_container_width=True,
+    hide_index=True,
 )
 
 for i, d in enumerate(convergency):

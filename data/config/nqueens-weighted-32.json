@@ -1,7 +1,7 @@
 {
   "config": {
     "pop_config": {
-      "dim": 16,
+      "dim": 32,
       "pop_size": 50,
       "pop_type": "Permuted"
     },

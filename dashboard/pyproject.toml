@@ -34,23 +34,23 @@ unsafe-fixes = true
 output-format = "full"
 include = ["**/*.py", "**/*.pyi", "**/pyproject.toml", "*.ipynb"]
 lint.select = [
-  "E",      # pycodestyle
-  "F",      # pyflakes
-  "UP",     # pyupgrade
-  "N",      # pep8-naming
-  "C90",    # mccabe
-  "I",      # isort
-  "PERF",   # perflint
-  "NPY",    # numpy
-  "PD",     # pandas
-  "PL",     # pylint
-  "RUF",    # ruff
-  "ERA",    # eradicate
-  "LOG",    # log
-  "FURB",   # refurb
-  "FLY",    # fly
-  "TRY",    # tryceratops
-  "TD",     # todo
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "C90",  # mccabe
+    "I",    # isort
+    "PERF", # perflint
+    "NPY",  # numpy
+    "PD",   # pandas
+    "PL",   # pylint
+    "RUF",  # ruff
+    "ERA",  # eradicate
+    "LOG",  # log
+    "FURB", # refurb
+    "FLY",  # fly
+    "TRY",  # tryceratops
+    "TD",   # todo
 ]
 
 [tool.pytest.ini_options]
@@ -59,16 +59,20 @@ addopts = "-s --cov=ocev_projeto --cov-report html:tests/htmlcov"
 
 [tool.coverage.report]
 exclude_lines = [
-  "def main",
-  "pragma: no cover",
-  "def __repr__",
-  "def __str__",
-  "raise AssertionError",
-  "raise NotImplementedError",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-  "if typing.TYPE_CHECKING:"
+    "def main",
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "if typing.TYPE_CHECKING:",
 ]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
 
 [tool.taskipy.tasks]
 test = "pytest tests/"
