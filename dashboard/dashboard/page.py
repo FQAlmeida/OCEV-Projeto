@@ -8,8 +8,8 @@ import plotly.express as px
 import polars as pl
 import streamlit as st
 import numpy as np
-from problems_repr_plotter import problems_dict
-from read_log_file import read_log_file
+from dashboard.problems_repr_plotter import problems_dict
+from dashboard.read_log_file import read_log_file
 
 st.set_page_config(st.session_state.get("title", "Resultados"), "🧬", "wide")
 
@@ -81,6 +81,7 @@ st.dataframe(
         "Mean": fitness.mean(),
         "Std": fitness.std(),
         "Best Value Human-Readable": best_all_runs.best,
+        "Constraint": best_all_runs.constraint * 1023,
         "Best Human-Readable": pprint.pformat(best_all_runs.decoded),
     }),
     use_container_width=True,
@@ -117,6 +118,7 @@ for i, d in enumerate(convergency):
                 "Population's Worst",
             ],
             labels={"value": "Fitness", "generation": "Generation"},
+            render_mode="webgl",
         ),
         use_container_width=True,
     )

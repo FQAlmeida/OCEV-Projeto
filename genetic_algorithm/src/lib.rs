@@ -359,7 +359,7 @@ impl<'a> GA<'a> {
             pb.inc(1);
         }
         self.log_run_result();
-        pb.finish_with_message("Run completed");
+        pb.finish_with_message(format!("Run completed:  {}", self.best_individual_value.unwrap_or(-1.0)));
         (self.best_individual.clone(), self.best_individual_value)
     }
 }

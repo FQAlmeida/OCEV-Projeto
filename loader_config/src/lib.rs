@@ -1,8 +1,8 @@
-use std::{fmt::Debug, fs, path::Path};
+use std::{fmt::Debug, path::Path};
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use pkl_rs::value_from_config;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum PopType {
@@ -93,10 +93,7 @@ impl Config {
     where
         P: AsRef<Path>,
     {
-        let data = fs::read_to_string(path).expect("Failed to read file");
-        let config_data: Value = serde_json::from_str(&data)?;
-        let obj: Config =
-            serde_json::from_value(config_data["config"].clone())?;
-        Ok(obj)
+        let config_data: Config = value_from_config(&path)?;
+        Ok(config_data)
     }
 }

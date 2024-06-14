@@ -11,7 +11,7 @@
     "crossover_method": "Cycle",
     "crossover_chance": 0.95,
     "mutation_chance": 0.005,
-    "constraint_penalty": -1.2,
+    "constraint_penalty": -1.0,
     "elitism": true,
     "generations_to_genocide": 150000,
     "kp": 0.95,

@@ -85,7 +85,7 @@ pub fn ask_for_config(problem_name: &str) -> Result<String> {
                 .path()
                 .extension()
                 .expect("Unable to retrieve file extension")
-                == "json"
+                == "pkl"
                 && entry
                     .file_name()
                     .into_string()

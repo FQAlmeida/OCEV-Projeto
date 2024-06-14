@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = {version = "1.0.82"}
-serde = {version = "1.0.198"}
-serde_json = {version = "1.0.116"}
-pkl-bind = { git = "https://github.com/Sir-NoChill/pkl-rust.git", branch = "main" }
+anyhow = { version = "1.0.82" }
+serde = { version = "1.0.198" }
+serde_json = { version = "1.0.116" }
+
+pkl-rs = { git = "https://github.com/z-jxy/pkl-rs", branch = "main" }
