@@ -1,8 +1,8 @@
-use std::{fmt::Debug, path::Path};
+use std::{fmt::Debug, fs, path::Path};
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use pkl_rs::value_from_config;
+use serde_json::Value;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum PopType {
@@ -93,7 +93,9 @@ impl Config {
     where
         P: AsRef<Path>,
     {
-        let config_data: Config = value_from_config(&path)?;
+        let config_str = fs::read_to_string(path)?;
+        let config_json: Value = serde_json::from_str(&config_str).expect("Config file wrong format");
+        let config_data: Config = serde_json::from_value(config_json.get("config").expect("Config file doesnt have config member").to_owned())?;
         Ok(config_data)
     }
 }
